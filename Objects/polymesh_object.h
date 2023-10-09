@@ -30,7 +30,7 @@ public:
 
 	int triangle_count;
 	vector<Vertex> vertex;
-	vector<vector<int>> triangle;
+	vector<vector<int> > triangle;
 
 	Hit *intersection(Ray ray);
 	void apply_transform(Transform& trans);
@@ -38,5 +38,9 @@ public:
     PolyMesh(char *file, bool smooth);
 	~PolyMesh(){}
 
+private:
 
+	void process(vector<string> file_line);
+	void process_vertex(vector<string> raw_vertex);
+	void process_face(vector<string> raw_face);
 };

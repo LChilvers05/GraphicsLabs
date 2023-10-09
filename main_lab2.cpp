@@ -31,6 +31,8 @@
  * You are expected to fill in the missing code in polymesh.cpp.
  */
 
+// g++ main_lab2.cpp Core/framebuffer.cpp linedrawer.cpp Objects/polymesh_object.cpp -IObjects -ICore -o main_lab2 && ./main_lab2
+
 #include "framebuffer.h"
 #include "linedrawer.h"
 #include "polymesh_object.h"
