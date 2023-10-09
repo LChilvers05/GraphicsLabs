@@ -21,11 +21,16 @@
 #pragma once
 
 #include "object.h"
+#include "vertex.h"
 
 typedef int TriangleIndex[3];
 
 class PolyMesh:public Object{
 public:
+
+	int triangle_count;
+	vector<Vertex> vertex;
+	vector<vector<int>> triangle;
 
 	Hit *intersection(Ray ray);
 	void apply_transform(Transform& trans);

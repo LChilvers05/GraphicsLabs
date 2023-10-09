@@ -28,22 +28,36 @@
 using namespace std;
 
 
-PolyMesh::PolyMesh(char* file, bool smooth)
-{
+PolyMesh::PolyMesh(char* file, bool smooth) {
 
+    // read file into stream
+    fstream file_stream;
+    file_stream.open(file, ios::in);
+
+    if (file_stream.is_open()) {
+        //get line by line of file
+        string file_line;
+        while (getline(file_stream, file_line)) {
+
+            //TODO: process the file line, check for v and f
+            //put into triangles and vertex
+        }
+
+    } else {
+        std::cout << "Couldn't open file";
+    }
+
+    file_stream.close();
     next = 0;
 }
 
-
-
-Hit* PolyMesh::intersection(Ray ray)
-{
+//TODO: ignore for Lab 2
+Hit* PolyMesh::intersection(Ray ray) {
     Hit* hits = 0;
 
     return hits;
 }
 
-void PolyMesh::apply_transform(Transform& trans)
-{
+void PolyMesh::apply_transform(Transform& trans) {
 
 }
