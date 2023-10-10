@@ -17,7 +17,7 @@
 #include <iostream>
 #include "linedrawer.h"
 
-void increment_whole(int* f, int* w, int dy, int dx) {
+void increment_whole(int* f, int* w, const int dy, const int dx) {
 
   if (abs(*f) > abs(dx)) {
 
@@ -42,9 +42,9 @@ int draw_x_line(FrameBuffer *fb, int sx, int sy, int ex, int ey) {
     dir = -1;
   }
 
+  const int dy = (ey - sy);
+  const int dx = ex - sx;
   int wy = sy; int x = sx;
-  int dy = (ey - sy);
-  int dx = ex - sx;
   int fy = dx/2;
   
   while (x != ex) {
@@ -52,7 +52,6 @@ int draw_x_line(FrameBuffer *fb, int sx, int sy, int ex, int ey) {
 
     x += dir;
     fy += dy;
-
     increment_whole(&fy, &wy, dy, dx);
   }
 
@@ -66,9 +65,9 @@ int draw_y_line(FrameBuffer *fb, int sx, int sy, int ex, int ey) {
     dir = -1;
   }
 
+  const int dy = ey - sy;
+  const int dx = ex - sx;
   int wx = sx; int y = sy;
-  int dy = ey - sy;
-  int dx = ex - sx;
   int fx = dy/2;
   
   while (y != ey) {
@@ -76,7 +75,6 @@ int draw_y_line(FrameBuffer *fb, int sx, int sy, int ex, int ey) {
 
     y += dir;
     fx += dx;
-
     increment_whole(&fx, &wx, dx, dy);
   }
 
@@ -85,14 +83,13 @@ int draw_y_line(FrameBuffer *fb, int sx, int sy, int ex, int ey) {
 
 int draw_line(FrameBuffer *fb, int sx, int sy, int ex, int ey)
 {
-  if ((sx == ex) && (sy==ey))
+  if ((sx==ex) && (sy==ey))
   {
     return fb->plotPixel(sx, sy, 1.0f, 1.0f, 1.0f);
     
   } else if (((ex-sx)* (ex-sx)) >= ((ey-sy)* (ey-sy)))
   {
     return draw_x_line(fb, sx, sy, ex, ey);
-    
   } else
   {
     return draw_y_line(fb, sx, sy, ex, ey);

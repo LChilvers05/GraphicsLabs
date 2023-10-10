@@ -72,7 +72,7 @@ int main(int argc, char *argv[])
   }
   
   // Output the framebuffer.
-  fb->writeRGBFile((char *)"test.ppm");
+  fb->writeRGBFile((char *)"test2.ppm");
 
   return 0;
   

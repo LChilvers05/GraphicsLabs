@@ -40,7 +40,9 @@ public:
 
 private:
 
-	void process(vector<string> file_line);
+	void read_file(char* file, bool smooth);
+	vector<string> split(string str, char ch);
+	void process(vector<string> line_components);
 	void process_vertex(vector<string> raw_vertex);
 	void process_face(vector<string> raw_face);
 };

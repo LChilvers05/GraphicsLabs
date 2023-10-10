@@ -8,8 +8,19 @@
                 "-fdiagnostics-color=always",
                 "-g",
                 "${file}",
+                "Core/framebuffer.cpp",
+                "linedrawer.cpp",
+                "Objects/polymesh_object.cpp",
+                "-IObjects",
+                "-ICore",
                 "-o",
                 "${fileDirname}/${fileBasenameNoExtension}"
+                // "main_lab2.cpp",
+                // "Core/framebuffer.cpp",
+                // "linedrawer.cpp",
+                // "Objects/polymesh_object.cpp",
+                // "-IObjects",
+                // "-ICore"
             ],
             "options": {
                 "cwd": "${fileDirname}"
