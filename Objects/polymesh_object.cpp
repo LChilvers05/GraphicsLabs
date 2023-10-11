@@ -85,13 +85,13 @@ void PolyMesh::process_vertex(vector<string> raw_vertex) {
     if (raw_vertex.size() < 4) { return; }
     //make vertex from v line
     try {
-        Vertex p (
+        Vertex v (
             stof(raw_vertex[1]),
             stof(raw_vertex[2]),
             stof(raw_vertex[3])
         );
 
-        vertex.push_back(p);
+        vertex.push_back(v);
 
     } catch (const std::invalid_argument& e) {
         printf("Could not convert vertex point to float");
@@ -115,9 +115,9 @@ void PolyMesh:: process_face(vector<string> raw_face) {
 }
 
 void PolyMesh::apply_transform(Transform& trans) {
-    for (int i = 0; i < vertex.size(); i++) {
-        trans.apply(vertex[i]);
-    }
+    // for (int i = 0; i < vertex.size(); i++) {
+    //     trans.apply(vertex[i]);
+    // }
 }
 
 //TODO: ignore for Lab 2

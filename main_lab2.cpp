@@ -44,9 +44,13 @@ int main(int argc, char *argv[])
 
   // The following transform allows 4D homogeneous coordinates to be transformed. It moves the supplied teapot model to somewhere visible.
   	Transform * transform = new Transform(1.0f, 0.0f, 0.0f, 0.0f,
-			0.0f, 0.0f, 1.0f, -55.0f,
-			0.0f, 1.0f, 0.0f, 20.0f,
+			0.0f, 0.0f, 1.0f, -5.0f,
+			0.0f, -1.0f, 0.0f, 20.0f,
 			0.0f, 0.0f, 0.0f, 1.0f);
+    // new Transform(1.0f, 0.0f, 0.0f, 0.0f,
+		// 	0.0f, 0.0f, 1.0f, -55.0f,
+		// 	0.0f, 1.0f, 0.0f, 20.0f,
+		// 	0.0f, 0.0f, 0.0f, 1.0f);
 
 	// Read in the teapot model.
   PolyMesh *pm = new PolyMesh((char *)"teapot.obj", false);
