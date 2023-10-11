@@ -115,9 +115,9 @@ void PolyMesh:: process_face(vector<string> raw_face) {
 }
 
 void PolyMesh::apply_transform(Transform& trans) {
-    // for (int i = 0; i < vertex.size(); i++) {
-    //     trans.apply(vertex[i]);
-    // }
+    for (int i = 0; i < vertex.size(); i++) {
+        trans.apply(vertex[i]);
+    }
 }
 
 //TODO: ignore for Lab 2
