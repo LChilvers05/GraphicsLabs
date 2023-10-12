@@ -30,7 +30,6 @@ using namespace std;
 
 
 PolyMesh::PolyMesh(char* file, bool smooth) {
-    triangle_count = 0;
     read_file(file, smooth);
     next = 0;
 }
@@ -46,6 +45,8 @@ void PolyMesh::read_file(char* file, bool smooth) {
         while (getline(file_stream, line)) {
             process(split(line, ' '));
         }
+
+        triangle_count = triangle.size();
 
     } else {
         printf("Couldn't open file");
@@ -88,7 +89,7 @@ void PolyMesh::process_vertex(vector<string> raw_vertex) {
         Vertex v (
             stof(raw_vertex[1]),
             stof(raw_vertex[2]),
-            stof(raw_vertex[3])
+            stof(raw_vertex[3]) + 0.0001
         );
 
         vertex.push_back(v);
@@ -98,20 +99,25 @@ void PolyMesh::process_vertex(vector<string> raw_vertex) {
     }
 }
 
-void PolyMesh:: process_face(vector<string> raw_face) {
+void PolyMesh::process_face(vector<string> raw_face) {
     if (raw_face.size() < 4) { return; }
     //make face from f line
-    triangle.push_back(vector<int>());
-    for (int i = 1; i < raw_face.size(); i++) {
-        vector<string> split_f = split(raw_face[i], '/');
-        try {
-            //obj v index start from 1 not 0
-            triangle[triangle_count].push_back(stoi(split_f[0])-1);
-        } catch (const std::invalid_argument& e) {
-            printf("Could not convert face point to int");
+    try {
+        //obj v index start from 1 not 0
+        int a = stoi(split(raw_face[1], '/')[0]) - 1;
+        //split a polygon into triangles
+        for (int i = 2; i < raw_face.size() - 1; i++) {
+
+            int b = stoi(split(raw_face[i], '/')[0]) - 1;
+            int c = stoi(split(raw_face[i+1], '/')[0]) - 1;
+
+            vector<int> tri;
+            tri.push_back(a); tri.push_back(b); tri.push_back(c);
+            triangle.push_back(tri);
         }
+    } catch (const std::invalid_argument& e) {
+        printf("Could not convert face point to int");
     }
-    triangle_count++;
 }
 
 void PolyMesh::apply_transform(Transform& trans) {

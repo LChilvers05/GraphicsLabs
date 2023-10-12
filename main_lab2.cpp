@@ -37,29 +37,30 @@
 #include "linedrawer.h"
 #include "polymesh_object.h"
 
-int main(int argc, char *argv[])
-{
+int main(int argc, char *argv[]) {
   // Create a framebuffer
   FrameBuffer *fb = new FrameBuffer(512,512);
 
   // The following transform allows 4D homogeneous coordinates to be transformed. It moves the supplied teapot model to somewhere visible.
-  	Transform * transform = new Transform(1.0f, 0.0f, 0.0f, 0.0f,
-			0.0f, 0.0f, 1.0f, -5.0f,
-			0.0f, -1.0f, 0.0f, 20.0f,
-			0.0f, 0.0f, 0.0f, 1.0f);
-    // new Transform(1.0f, 0.0f, 0.0f, 0.0f,
-		// 	0.0f, 0.0f, 1.0f, -55.0f,
-		// 	0.0f, 1.0f, 0.0f, 20.0f,
-		// 	0.0f, 0.0f, 0.0f, 1.0f);
+  Transform * transform = new Transform(
+    1.0f, 0.0f, 0.0f, 0.0f,
+		0.0f, 0.0f, 1.0f, -5.0f,
+		0.0f, -1.0f, 0.0f, 20.0f,
+		0.0f, 0.0f, 0.0f, 1.0f
+  );
+  // Transform *transform = new Transform(
+  //   1.0f, 0.0f, 0.0f, 0.0f, 
+  //   0.0f, 0.0f, 1.0f, -55.0f, 
+  //   0.0f, 1.0f, 0.0f, 20.0f, 
+  //   0.0f, 0.0f, 0.0f, 1.0f
+  // );
 
-	// Read in the teapot model.
+  // Read in the teapot model.
   PolyMesh *pm = new PolyMesh((char *)"teapot.obj", false);
   pm->apply_transform(*transform);
 
-
   // For each triangle in the model,
-  for (int i = 0; i< pm->triangle_count; i += 1)
-  {
+  for (int i = 0; i< pm->triangle_count; i += 1) {
     // The following lines project the point onto the 2D image from 3D space.
     float x0 = (pm->vertex[pm->triangle[i][0]].x/pm->vertex[pm->triangle[i][0]].z)*256 + 256.0;
     float y0 = -(pm->vertex[pm->triangle[i][0]].y/pm->vertex[pm->triangle[i][0]].z)*256 + 256.0;
@@ -79,5 +80,4 @@ int main(int argc, char *argv[])
   fb->writeRGBFile((char *)"test2.ppm");
 
   return 0;
-  
 }

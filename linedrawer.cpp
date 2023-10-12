@@ -88,8 +88,8 @@ int draw_line(FrameBuffer *fb, int sx, int sy, int ex, int ey) {
     if ((sx == ex) && (sy == ey)) {
         return fb->plotPixel(sx, sy, 1.0f, 1.0f, 1.0f);
     } else if (((ex - sx) * (ex - sx)) >= ((ey - sy) * (ey - sy))) {
-        return draw_x_line(fb, ex, ey, sx, sy);
+        return draw_x_line(fb, sx, sy, ex, ey);
     } else {
-        return draw_y_line(fb, ex, ey, sx, sy);
+        return draw_y_line(fb, sx, sy, ex, ey);
     }
 }
