@@ -18,27 +18,55 @@
 
 #include "full_camera.h"
 
-FullCamera::FullCamera()
-{
+FullCamera::FullCamera() {
+    fov = 0.5f;
+}
+
+FullCamera::FullCamera(float f, Vertex& p_position, Vector& p_lookat, Vector& p_up) {
+    fov = f;
+    position = p_position;
+    lookat = p_lookat;
+    up = p_up;
+}
+
+void FullCamera::get_ray_offset(int p_x, int p_y, float p_ox, float p_oy, Ray& p_ray) {
 
 }
 
-FullCamera::FullCamera(float f, Vertex& p_position, Vector& p_lookat, Vector& p_up)
-{
+void FullCamera::get_ray_pixel(int p_x, int p_y, Ray &ray) {
+    //construct an orthonormal basis
+    float e_l = (float)1/(position.operator-(lookat).length());
 
+    Vector w = position.operator-(lookat.operator*(e_l));
+
+    Vector w_cross_up = Vector();
+    w.cross(up, w_cross_up);
+    float w_cross_up_length = w_cross_up.length();
+
+    Vector u = w_cross_up.operator*(w_cross_up_length);
+
+    Vector v = Vector();
+    w.cross(u, v);
+
+    //TODO: create a direction of ray
+    //TODO: manipulate ray to be returned.
 }
 
-void FullCamera::get_ray_offset(int p_x, int p_y, float p_ox, float p_oy, Ray& p_ray)
-{
+void FullCamera::render(Environment& env, FrameBuffer& fb) {
+    width = fb.width;
+    height = fb.height;
 
-}
+    //for each pixel
+    for (int y = 0; y < height; y +=1) {
+        for (int x = 0; x < width; x +=1) {
+            Ray ray;
 
-void FullCamera::get_ray_pixel(int p_x, int p_y, Ray &ray)
-{
+            // get_ray_pixel();
 
-}
+            Colour colour;
+            float depth;
 
-void FullCamera::render(Environment& env, FrameBuffer& fb)
-{
 
+        }
+    }
 }

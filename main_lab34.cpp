@@ -47,8 +47,7 @@
 using namespace std;
 
 // you will find it useful during development/debugging to create multiple functions that fill out the scene.
-void build_scene(Scene& scene)
-{
+void build_scene(Scene& scene) {
   Sphere *sp = new Sphere(Vertex(0.0f,0.0f,2.0f),1.0f);
   FalseColour *fm = new FalseColour();
   sp->set_material(fm);
@@ -57,8 +56,7 @@ void build_scene(Scene& scene)
 
 
 // This is the entry point function to the program.
-int main(int argc, char *argv[])
-{
+int main(int argc, char *argv[]) {
 	int width = 512;
 	int height = 512;
 	// Create a framebuffer
@@ -71,14 +69,14 @@ int main(int argc, char *argv[])
 	build_scene(scene);
 	
 	// Declare a camera
-	Camera *camera = new SimpleCamera(0.5f);
-	//Camera* camera = new FullCamera(0.5f, Vertex(-1.0f, 0.0f, 0.0f), Vector(1.0f, 0.0f, 1.0f), Vector(0.0f, 1.0f, 0.0f));
+	// Camera *camera = new SimpleCamera(0.5f);
+	Camera *camera = new FullCamera(0.5f, Vertex(-1.0f, 0.0f, 0.0f), Vector(1.0f, 0.0f, 1.0f), Vector(0.0f, 1.0f, 0.0f));
 	
 	// Camera generates rays for each pixel in the framebuffer and records colour + depth.
 	camera->render(scene,*fb);
 	
 	// Output the framebuffer colour and depth as two images
-	fb->writeRGBFile((char *)"test.ppm");
+	fb->writeRGBFile((char *)"test3.ppm");
 	fb->writeDepthFile((char *)"depth.ppm");
 	
 	cerr << "\nDone.\n" << flush;
