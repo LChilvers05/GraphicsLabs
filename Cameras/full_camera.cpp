@@ -25,31 +25,53 @@ FullCamera::FullCamera() {
 FullCamera::FullCamera(float f, Vertex& p_position, Vector& p_lookat, Vector& p_up) {
     fov = f;
     position = p_position;
-    lookat = p_lookat;
-    up = p_up;
+    lookat = p_lookat; lookat.normalise();
+    up = p_up; up.normalise();
+    make_orthonormal_bases(position, lookat, up);
+}
+
+void FullCamera::make_orthonormal_bases(Vertex& eye, Vector& look, Vector& up) {
+    //w = eye - (look / |eye - look|)
+    float e_l = 1.0f/(eye.operator-(look).length());
+    w = eye.operator-(look.operator*(e_l));
+    //u = (w X up) / (|w X up|)
+    Vector w_X_up = Vector();
+    w.cross(up, w_X_up);
+    float w_X_up_len = 1.0f/w_X_up.length();
+    u = w_X_up.operator*(w_X_up_len);
+    //v = w X u
+    w.cross(u, v);
 }
 
 void FullCamera::get_ray_offset(int p_x, int p_y, float p_ox, float p_oy, Ray& p_ray) {
 
 }
 
-void FullCamera::get_ray_pixel(int p_x, int p_y, Ray &ray) {
-    //construct an orthonormal basis
-    float e_l = (float)1/(position.operator-(lookat).length());
+void FullCamera::get_ray_pixel(int p_x, int p_y, Ray& ray) {    
+    //each ray begins at the eye point
+    ray.position = position;
+    ray.position.w = 1.0f;
 
-    Vector w = position.operator-(lookat.operator*(e_l));
+    float fx = ((float)p_x) - ((float)width/2.0f);
+    float fy = ((float)p_y) - ((float)height/2.0f);
 
-    Vector w_cross_up = Vector();
-    w.cross(up, w_cross_up);
-    float w_cross_up_length = w_cross_up.length();
+    //distance
+    float d = (float)sqrt((double)(
+        pow(p_x-position.x, 2) + 
+        pow(p_y-position.y, 2) + 
+        pow(position.z, 2)
+    ));
 
-    Vector u = w_cross_up.operator*(w_cross_up_length);
+    //create direction vector from orthonormal basis
+    Vector x_u = u.operator*(fx);
+    Vector y_v = v.operator*(fy);
+    Vector d_w = w.operator*(d);
 
-    Vector v = Vector();
-    w.cross(u, v);
-
-    //TODO: create a direction of ray
-    //TODO: manipulate ray to be returned.
+    Vector x_u_y_v = x_u.operator+(y_v);
+    ray.direction.x = x_u_y_v.x - d_w.x;
+    ray.direction.y = x_u_y_v.y - d_w.y;
+    ray.direction.z = fov*(x_u_y_v.z - d_w.z);
+    ray.direction.normalise();
 }
 
 void FullCamera::render(Environment& env, FrameBuffer& fb) {
@@ -57,16 +79,21 @@ void FullCamera::render(Environment& env, FrameBuffer& fb) {
     height = fb.height;
 
     //for each pixel
-    for (int y = 0; y < height; y +=1) {
-        for (int x = 0; x < width; x +=1) {
+    for (int y = 0; y < height; y++) {
+        for (int x = 0; x < width; x++) {
             Ray ray;
 
-            // get_ray_pixel();
+            get_ray_pixel(x, y, ray);
 
             Colour colour;
             float depth;
+            
+            env.raytrace(ray, 5, colour, depth);
 
-
+            fb.plotPixel(x, y, colour.r, colour.g, colour.b);
+			fb.plotDepth(x, y, depth);
         }
+
+        cerr << "#" << flush;
     }
 }

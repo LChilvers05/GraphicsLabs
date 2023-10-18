@@ -33,11 +33,17 @@ public:
   Vertex position;
   Vector lookat;
   Vector up;
-  Vector right;
+
+  //orthonormal basis
+  Vector w;
+  Vector u;
+  Vector v;
 
   FullCamera();
 
   FullCamera(float p_f, Vertex& p_position, Vector& p_lookat, Vector &p_up);
+
+  void make_orthonormal_bases(Vertex& eye, Vector& look, Vector& up);
 	
   void get_ray_offset(int p_x, int p_y, float p_ox, float p_oy, Ray &p_ray);
 
