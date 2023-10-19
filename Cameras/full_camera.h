@@ -31,26 +31,28 @@ public:
   int height;
   float fov;
   Vertex position;
-  Vertex lookat_point;
   Vector lookat;
   Vector up;
-
-  //orthonormal basis
-  Vector w;
-  Vector u;
-  Vector v;
 
   FullCamera();
 
   FullCamera(float p_f, Vertex& p_position, Vector& p_lookat, Vector &p_up);
 
-  void make_orthonormal_bases(Vertex& eye, Vertex& look, Vector& up);
-	
   void get_ray_offset(int p_x, int p_y, float p_ox, float p_oy, Ray &p_ray);
 
   void get_ray_pixel(int p_x, int p_y, Ray &ray);
 
   void render(Environment& env, FrameBuffer& fb);
+
+private:
+  Vertex lookat_point;
+  //orthonormal basis
+  Vector w;
+  Vector u;
+  Vector v;
+
+  void make_orthonormal_bases(Vertex& eye, Vertex& look, Vector& up);
+
 };
 
 #endif

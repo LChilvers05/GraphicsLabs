@@ -31,6 +31,8 @@ public:
 	int triangle_count;
 	vector<Vertex> vertex;
 	vector<vector<int> > triangle;
+	vector<Vector> vertex_normals;
+	vector<Vector> face_normals;
 
 	Hit *intersection(Ray ray);
 	void apply_transform(Transform& trans);
@@ -44,5 +46,7 @@ private:
 	vector<string> split(string str, char ch);
 	void process(vector<string> line_components);
 	void process_vertex(vector<string> raw_vertex);
+	void process_vertex_normal(vector<string> raw_vertex_normal);
 	void process_face(vector<string> raw_face);
+	Vector get_face_normal(const vector<int>& tri, const vector<Vertex>& vertex);
 };

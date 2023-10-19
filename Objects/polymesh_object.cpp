@@ -77,6 +77,10 @@ void PolyMesh::process(vector<string> line) {
     //check for vertex and face lines
     if (!line[0].compare("v")) {
         process_vertex(line);
+    } else if (!line[0].compare("vn")) {
+        process_vertex_normal(line);
+    } else if (!line[0].compare("vt")) {
+        return;
     } else if (!line[0].compare("f")) {
         process_face(line);
     } else { return; }
@@ -99,6 +103,23 @@ void PolyMesh::process_vertex(vector<string> raw_vertex) {
     }
 }
 
+void PolyMesh::process_vertex_normal(vector<string> raw_vertex_normal) {
+    if (raw_vertex_normal.size() < 4) { return; }
+    //make vertex normal from vn line
+    try {
+        Vector vn (
+            stof(raw_vertex_normal[1]),
+            stof(raw_vertex_normal[2]),
+            stof(raw_vertex_normal[3])
+        );
+        vn.normalise();
+        vertex_normals.push_back(vn);
+
+    } catch (const std::invalid_argument& e) {
+        printf("Could not convert vertex normal to float");
+    }
+}
+
 void PolyMesh::process_face(vector<string> raw_face) {
     if (raw_face.size() < 4) { return; }
     //make face from f line
@@ -114,10 +135,23 @@ void PolyMesh::process_face(vector<string> raw_face) {
             vector<int> tri;
             tri.push_back(a); tri.push_back(b); tri.push_back(c);
             triangle.push_back(tri);
+            //get face normal with triangle vertices
+            face_normals.push_back(get_face_normal(tri, vertex));
         }
     } catch (const std::invalid_argument& e) {
         printf("Could not convert face point to int");
     }
+}
+
+Vector PolyMesh::get_face_normal(const vector<int>& tri, const vector<Vertex>& vertex) {
+    //three vertices of triangle
+    Vertex a = vertex[tri[0]]; Vertex b = vertex[tri[1]]; Vertex c = vertex[tri[2]];
+    //two direction vectors (edges of triangle)
+    Vector ab = a.operator-(b); Vector ac = a.operator-(c);
+    //normal is cross product of two edges
+    Vector normal = Vector(); ab.cross(ac, normal);
+
+    return normal;
 }
 
 void PolyMesh::apply_transform(Transform& trans) {
