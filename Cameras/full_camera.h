@@ -45,7 +45,6 @@ public:
   void render(Environment& env, FrameBuffer& fb);
 
 private:
-  Vertex lookat_point;
   //orthonormal basis
   Vector w;
   Vector u;

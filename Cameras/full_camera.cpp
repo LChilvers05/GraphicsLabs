@@ -26,21 +26,21 @@ FullCamera::FullCamera(float f, Vertex& p_position, Vector& p_lookat, Vector& p_
     fov = f;
     position = p_position;
     lookat = p_lookat; lookat.normalise();
-    //need look point not direction
-    lookat_point = position.operator+(lookat);
     up = p_up; up.normalise();
+
+    Vertex lookat_point = position + lookat;
     make_orthonormal_bases(position, lookat_point, up);
 }
 
 void FullCamera::make_orthonormal_bases(Vertex& eye, Vertex& look, Vector& up) {
     //w = eye - (look / |eye - look|)
-    float e_l = 1.0f/(eye.operator-(look).length());
-    w = eye.operator-(look.operator*(e_l));
+    float e_l = 1.0f/(eye - look).length();
+    w = eye - (look * e_l);
     //u = (w X up) / (|w X up|)
     Vector w_X_up = Vector();
     w.cross(up, w_X_up);
     float w_X_up_len = 1.0f/w_X_up.length();
-    u = w_X_up.operator*(w_X_up_len);
+    u = w_X_up * w_X_up_len;
     //v = w X u
     w.cross(u, v);
 }
@@ -61,14 +61,7 @@ void FullCamera::get_ray_pixel(int p_x, int p_y, Ray& ray) {
     float d = (height/2.0f)/tan(fov);
 
     //create direction vector from orthonormal basis
-    Vector x_u = u.operator*(fx);
-    Vector y_v = v.operator*(fy);
-    Vector d_w = w.operator*(d);
-
-    Vector x_u_y_v = x_u.operator+(y_v);
-    ray.direction.x = x_u_y_v.x - d_w.x;
-    ray.direction.y = x_u_y_v.y - d_w.y;
-    ray.direction.z = x_u_y_v.z - d_w.z;
+    ray.direction = (u * fx) + (v * fy) - (w * d);
     ray.direction.normalise();
 }
 
