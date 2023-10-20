@@ -148,7 +148,7 @@ void Scene::raytrace(Ray ray, int recurse, Colour &colour, float &depth)
 			  lit = false;//light is facing wrong way.
 		  }
 
-		  // Put the shadow check here, if lit==true and in shadow, set lit=false
+		  //TODO: Put the shadow check here, if lit==true and in shadow, set lit=false
 
 
 		  if (lit)

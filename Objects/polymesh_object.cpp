@@ -147,10 +147,10 @@ Vector PolyMesh::get_face_normal(const vector<int>& tri, const vector<Vertex>& v
     //three vertices of triangle
     Vertex a = vertex[tri[0]]; Vertex b = vertex[tri[1]]; Vertex c = vertex[tri[2]];
     //two direction vectors (edges of triangle)
-    Vector ab = a.operator-(b); Vector ac = a.operator-(c);
+    Vector edge1 = c - a; Vector edge2 = b - a;
     //normal is cross product of two edges
-    Vector normal = Vector(); ab.cross(ac, normal);
-
+    edge1.cross(edge2);
+    Vector normal = edge1; normal.normalise();
     return normal;
 }
 
@@ -160,7 +160,10 @@ void PolyMesh::apply_transform(Transform& trans) {
     }
 }
 
-//TODO: ignore for Lab 2
+//TODO: do work here for lab 3
+    //1. compute equation of plane from the normal
+    //2. check to see if intersection with plane from the ray
+    //3. plane is inifite - so need to check to make sure it is within the triangle
 Hit* PolyMesh::intersection(Ray ray) {
     Hit* hits = 0;
 

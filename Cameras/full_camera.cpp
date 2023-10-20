@@ -34,15 +34,13 @@ FullCamera::FullCamera(float f, Vertex& p_position, Vector& p_lookat, Vector& p_
 
 void FullCamera::make_orthonormal_bases(Vertex& eye, Vertex& look, Vector& up) {
     //w = eye - (look / |eye - look|)
-    float e_l = 1.0f/(eye - look).length();
-    w = eye - (look * e_l);
+    float e_l = (1.0f/(eye - look).length());
+    this->w = eye - (look * e_l);
     //u = (w X up) / (|w X up|)
-    Vector w_X_up = Vector();
-    w.cross(up, w_X_up);
-    float w_X_up_len = 1.0f/w_X_up.length();
-    u = w_X_up * w_X_up_len;
+    Vector u = Vector(); w.cross(up, u); u.normalise();
+    this->u = u;
     //v = w X u
-    w.cross(u, v);
+    w.cross(u, this->v);
 }
 
 void FullCamera::get_ray_offset(int p_x, int p_y, float p_ox, float p_oy, Ray& p_ray) {
@@ -54,8 +52,9 @@ void FullCamera::get_ray_pixel(int p_x, int p_y, Ray& ray) {
     ray.position = position;
     ray.position.w = 1.0f;
 
-    float fx = ((float)p_x) - (width/2.0f);
-    float fy = ((float)p_y) - (height/2.0f);
+    float s = 1.0f;
+    float fx = s*((float)p_x) - (width/2.0f);
+    float fy = s*((float)p_y) - (height/2.0f);
 
     //distance
     float d = (height/2.0f)/tan(fov);

@@ -47,13 +47,27 @@
 using namespace std;
 
 // you will find it useful during development/debugging to create multiple functions that fill out the scene.
-void build_scene(Scene& scene) {
-  Sphere *sp = new Sphere(Vertex(0.0f,0.0f,2.0f),1.0f);
-  FalseColour *fm = new FalseColour();
-  sp->set_material(fm);
-  scene.add_object(sp);
+Sphere* make_sphere() {
+	return new Sphere(Vertex(0.0f,0.0f,2.0f),1.0f);
 }
 
+PolyMesh* make_teapot() {
+	PolyMesh* teapot = new PolyMesh((char *)"teapot.obj", false);
+	Transform * transform = new Transform(
+		1.0f, 0.0f, 0.0f, 0.0f,
+		0.0f, 0.0f, 1.0f, -5.0f,
+		0.0f, -1.0f, 0.0f, 20.0f,
+		0.0f, 0.0f, 0.0f, 1.0f
+  	); teapot->apply_transform(*transform);
+	return teapot;
+}
+
+void build_scene(Scene& scene) {
+  	Object* object = make_sphere();
+	FalseColour *mat = new FalseColour();
+    object->set_material(mat);
+	scene.add_object(object);
+}
 
 // This is the entry point function to the program.
 int main(int argc, char *argv[]) {
