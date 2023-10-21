@@ -174,6 +174,7 @@ Plane PolyMesh::get_face_plane(const vector<int>& tri,
 }
 
 void PolyMesh::apply_transform(Transform& trans) {
+    //TODO: must also transform face normals and planes
     for (int i = 0; i < vertex.size(); i++) {
         trans.apply(vertex[i]);
     }
@@ -185,7 +186,6 @@ void PolyMesh::set_material(Material* p_m) {
     }
 }
 
-// TODO: transform teapot!
 Hit* PolyMesh::intersection(Ray ray) {
     Hit* hits = 0;
     for (int i = 0; i < triangle_count; i++) {
@@ -197,7 +197,7 @@ Hit* PolyMesh::intersection(Ray ray) {
         Hit* hit = face_planes[i].intersection(ray);
         if (hit == 0) { continue; }
         // check to see if hit is inside triangle
-        Vector edge1 = a - b; Vector edge2 = b - c; Vector edge3 = c - a;
+        Vector edge1 = b - a; Vector edge2 = c - b; Vector edge3 = a - c;
         Vertex pos = hit->position;
         // check three normals for same direction
         Vector n1 = (pos - a); n1.cross(edge1); n1.normalise();
