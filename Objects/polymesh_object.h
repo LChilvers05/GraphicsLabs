@@ -22,6 +22,7 @@
 
 #include "object.h"
 #include "vertex.h"
+#include "plane_object.h"
 
 typedef int TriangleIndex[3];
 
@@ -32,15 +33,18 @@ public:
 	vector<Vertex> vertex;
 	vector<vector<int> > triangle;
 	vector<Vector> vertex_normals;
-	vector<Vector> face_normals;
 
 	Hit *intersection(Ray ray);
 	void apply_transform(Transform& trans);
+	void set_material(Material* p_m);
 
     PolyMesh(char *file, bool smooth);
 	~PolyMesh(){}
 
 private:
+
+	vector<Vector> face_normals;
+	vector<Plane> face_planes;	
 
 	void read_file(char* file, bool smooth);
 	vector<string> split(string str, char ch);
@@ -49,4 +53,5 @@ private:
 	void process_vertex_normal(vector<string> raw_vertex_normal);
 	void process_face(vector<string> raw_face);
 	Vector get_face_normal(const vector<int>& tri, const vector<Vertex>& vertex);
+	Plane get_face_plane(const vector<int>& tri, const vector<Vertex>& vertex, const Vector& normal);
 };
