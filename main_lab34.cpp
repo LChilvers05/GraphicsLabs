@@ -63,7 +63,7 @@ PolyMesh* make_teapot() {
 }
 
 void build_scene(Scene& scene) {
-  	Object* object = make_sphere();
+  	Object* object = make_teapot();
 	FalseColour *mat = new FalseColour();
     object->set_material(mat);
 	scene.add_object(object);
@@ -84,8 +84,13 @@ int main(int argc, char *argv[]) {
 	
 	// Declare a camera
 	// Camera *camera = new SimpleCamera(0.5f);
-	Vertex p_position = Vertex(-2.0f, 0.0f, 0.0f);
-	Vector p_lookat = Vector(2.0f, 0.0f, 2.0f);
+	// Vertex p_position = Vertex(-2.0f, 0.0f, 0.0f);
+	// Vector p_lookat = Vector(2.0f, 0.0f, 2.0f);
+	// Vector p_up = Vector(0.0f, 1.0f, 0.0f);
+	// Camera *camera = new FullCamera(0.5f, p_position, p_lookat, p_up);
+
+	Vertex p_position = Vertex(0.0f, 0.0f, 0.0f);
+	Vector p_lookat = Vector(0.0f, 0.0f, 2.0f);
 	Vector p_up = Vector(0.0f, 1.0f, 0.0f);
 	Camera *camera = new FullCamera(0.5f, p_position, p_lookat, p_up);
 	

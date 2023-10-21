@@ -23,6 +23,7 @@
 #include <string>
 #include <sstream>
 #include <vertex.h>
+#include <plane_object.h>
 
 #include "polymesh_object.h"
 
@@ -160,12 +161,38 @@ void PolyMesh::apply_transform(Transform& trans) {
     }
 }
 
-//TODO: do work here for lab 3
-    //1. compute equation of plane from the normal
-    //2. check to see if intersection with plane from the ray
-    //3. plane is inifite - so need to check to make sure it is within the triangle
 Hit* PolyMesh::intersection(Ray ray) {
     Hit* hits = 0;
+    for (int i = 0; i < triangle_count; i++) {
+        //compute plane of triangle with normal
+        Vertex a = vertex[triangle[i][0]];
+        Vertex b = vertex[triangle[i][1]];
+        Vertex c = vertex[triangle[i][2]];
+        Vector normal = face_normals[i];
+        //Ax + By + Cz + D = 0
+        Plane plane = Plane(
+            normal.x, 
+            normal.y, 
+            normal.z,
+            (-normal.x*a.x)-(normal.y*a.y)-(normal.z*a.z)
+        );
+
+        Hit* hit = plane.intersection(ray);
+        // check to see if hit is inside triangle
+        Vector edge1 = a-b; Vector edge2 = b-c; Vector edge3 = c-a;
+        Vertex pos = hit->position;
+        //check three normals for same direction
+        Vector n1 = (pos - a); n1.cross(edge1); n1.normalise();
+        Vector n2 = (pos - b); n2.cross(edge2); n2.normalise();
+        Vector n3 = (pos - c); n3.cross(edge3); n3.normalise();
+
+        if ((n1-n2).length() == 0 && (n2-n3).length() == 0) {
+            //inside triangle
+            hits = hit;
+        } else {
+            //outside triangle
+        }
+    }
 
     return hits;
 }
