@@ -47,16 +47,11 @@
 using namespace std;
 
 Sphere* make_sphere() {
-	Sphere* sphere = new Sphere(Vertex(0.0f,0.0f,2.0f),1.0f);
-	FalseColour *mat = new FalseColour();
-	sphere->set_material(mat);
-	return sphere;
+	return new Sphere(Vertex(0.0f,0.0f,2.0f),1.0f);
 }
 
 PolyMesh* make_teapot() {
 	PolyMesh* teapot = new PolyMesh((char *)"teapot-low.obj", false);
-	FalseColour *mat = new FalseColour();
-	teapot->set_material(mat);
 	Transform * transform = new Transform(
 		1.0f, 0.0f, 0.0f, 0.0f,
 		0.0f, cos(90.0f), sin(90.0f), 0.0f,
@@ -68,6 +63,8 @@ PolyMesh* make_teapot() {
 
 void build_scene(Scene& scene) {
   	Object* object = make_teapot();
+	FalseColour *mat = new FalseColour();
+	object->set_material(mat);
 	scene.add_object(object);
 }
 
@@ -87,8 +84,8 @@ int main(int argc, char *argv[]) {
 	// Vertex p_position = Vertex(10.0f, 20.0f, -30.0f);
 	// Vector p_lookat = Vector(-1.0f, -2.0f, 3.0f);
 	// Vector p_up = Vector(0.0f, 1.0f, 0.0f);
-	Vertex p_position = Vertex(-10.0f, 0.0f, -30.0f);
-	Vector p_lookat = Vector(1.0f, 0.0f, 3.0f);
+	Vertex p_position = Vertex(0.0f, 0.0f, -30.0f);
+	Vector p_lookat = Vector(0.0f, 0.0f, 2.0f);
 	Vector p_up = Vector(0.0f, 1.0f, 0.0f);
 	Camera *camera = new FullCamera(0.6f, p_position, p_lookat, p_up);
 	

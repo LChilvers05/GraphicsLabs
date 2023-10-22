@@ -134,10 +134,6 @@ void PolyMesh::process_face(vector<string> raw_face) {
             vector<int> tri;
             tri.push_back(a); tri.push_back(b); tri.push_back(c);
             triangle.push_back(tri);
-            // get face normal + plane with triangle
-            Vector normal = get_face_normal(tri, vertex);
-            face_normals.push_back(normal);
-            face_planes.push_back(get_face_plane(tri, vertex, normal));
         }
     } catch (const std::invalid_argument& e) {
         printf("Could not convert face point to int");
@@ -165,27 +161,20 @@ Plane PolyMesh::get_face_plane(const vector<int>& tri,
     Vertex b = vertex[tri[1]];
     Vertex c = vertex[tri[2]];
     // Ax + By + Cz + D = 0
-    return Plane(
+    Plane plane = Plane(
         normal.x, 
         normal.y, 
         normal.z,
         (-normal.x * a.x) - (normal.y * a.y) - (normal.z * a.z)
     );
+
+    plane.set_material(material);
+    return plane;
 }
 
 void PolyMesh::apply_transform(Transform& trans) {
     for (int i = 0; i < vertex.size(); i++) {
         trans.apply(vertex[i]);
-    }
-    for (int i = 0; i < triangle_count; i++) {
-        trans.apply(face_normals[i]);
-        face_planes[i].apply_transform(trans);
-    }
-}
-
-void PolyMesh::set_material(Material* p_m) {
-    for (int i = 0; i < face_planes.size(); i++) {
-        face_planes[i].set_material(p_m);
     }
 }
 
@@ -193,15 +182,21 @@ Hit* PolyMesh::intersection(Ray ray) {
 
     Hit* hits = 0;
     Hit* curr_hit;
-
+    //TODO: the order of the triangles in the loop matters!
     for (int i = 0; i < triangle_count; i++) {
-        Vertex a = vertex[triangle[i][0]];
-        Vertex b = vertex[triangle[i][1]];
-        Vertex c = vertex[triangle[i][2]];
+        //make plane from triangle face
+        vector<int> tri = triangle[i];
+        Vector normal = get_face_normal(tri, vertex);
+        Plane plane = get_face_plane(tri, vertex, normal);
+
         // detect a hit
-        Hit* hit = face_planes[i].intersection(ray);
+        Hit* hit = plane.intersection(ray);
         if (hit == 0) { continue; }
-        // check to see if hit is inside triangle
+
+        // check to see if hit is inside triangle (a, b, c)
+        Vertex a = vertex[tri[0]];
+        Vertex b = vertex[tri[1]];
+        Vertex c = vertex[tri[2]];
         Vector edge1 = b - a; Vector edge2 = c - b; Vector edge3 = a - c;
         Vertex pos = hit->position;
         // check three normals for same direction
@@ -209,19 +204,19 @@ Hit* PolyMesh::intersection(Ray ray) {
         Vector n2 = (pos - b); n2.cross(edge2); n2.normalise();
         Vector n3 = (pos - c); n3.cross(edge3); n3.normalise();
 
-        if ((n1 - n2).length() < 0.01f && (n2 - n3).length() < 0.01f) {
+        if ((n1 - n2).length() < 0.0001f && (n2 - n3).length() < 0.0001f) {
             // inside triangle
             if (hits == 0) {
                 hits = hit;
                 curr_hit = hit;
-            } else {
-                while (curr_hit->next != 0) {
-                    curr_hit = curr_hit->next;
-                }
-                curr_hit->next = hit;
+                continue;
             }
+            while (curr_hit->next != 0) {
+                curr_hit = curr_hit->next;
+            }
+            curr_hit->next = hit;
         }
     }
-
+    //TODO: need to sort hit linked list;
     return hits;
 }

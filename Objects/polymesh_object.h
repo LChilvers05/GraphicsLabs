@@ -36,15 +36,11 @@ public:
 
 	Hit *intersection(Ray ray);
 	void apply_transform(Transform& trans);
-	void set_material(Material* p_m);
 
     PolyMesh(char *file, bool smooth);
 	~PolyMesh(){}
 
-private:
-
-	vector<Vector> face_normals;
-	vector<Plane> face_planes;	
+private:	
 
 	void read_file(char* file, bool smooth);
 	vector<string> split(string str, char ch);
