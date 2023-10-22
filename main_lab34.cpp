@@ -46,7 +46,6 @@
 
 using namespace std;
 
-// you will find it useful during development/debugging to create multiple functions that fill out the scene.
 Sphere* make_sphere() {
 	Sphere* sphere = new Sphere(Vertex(0.0f,0.0f,2.0f),1.0f);
 	FalseColour *mat = new FalseColour();
@@ -58,12 +57,12 @@ PolyMesh* make_teapot() {
 	PolyMesh* teapot = new PolyMesh((char *)"teapot-low.obj", false);
 	FalseColour *mat = new FalseColour();
 	teapot->set_material(mat);
-	// Transform * transform = new Transform(
-	// 	1.0f, 0.0f, 0.0f, 0.0f,
-	// 	0.0f, 0.0f, 1.0f, -5.0f,
-	// 	0.0f, -1.0f, 0.0f, 20.0f,
-	// 	0.0f, 0.0f, 0.0f, 1.0f
-  	// ); teapot->apply_transform(*transform);
+	Transform * transform = new Transform(
+		1.0f, 0.0f, 0.0f, 0.0f,
+		0.0f, cos(90.0f), sin(90.0f), 0.0f,
+		0.0f, -sin(90.0f), cos(90.0f), 0.0f,
+		0.0f, 0.0f, 0.0f, 1.0f
+  	); teapot->apply_transform(*transform);
 	return teapot;
 }
 
@@ -84,18 +83,14 @@ int main(int argc, char *argv[]) {
 	
 	// Setup the scene
 	build_scene(scene);
-	
-	// Declare a camera
-	// Camera *camera = new SimpleCamera(0.5f);
-	// Vertex p_position = Vertex(-2.0f, 0.0f, 0.0f);
-	// Vector p_lookat = Vector(2.0f, 0.0f, 2.0f);
-	// Vector p_up = Vector(0.0f, 1.0f, 0.0f);
-	// Camera *camera = new FullCamera(0.5f, p_position, p_lookat, p_up);
 
-	Vertex p_position = Vertex(0.0f, 0.0f, -40.0f);
-	Vector p_lookat = Vector(0.0f, 0.0f, 2.0f);
+	// Vertex p_position = Vertex(10.0f, 20.0f, -30.0f);
+	// Vector p_lookat = Vector(-1.0f, -2.0f, 3.0f);
+	// Vector p_up = Vector(0.0f, 1.0f, 0.0f);
+	Vertex p_position = Vertex(-10.0f, 0.0f, -30.0f);
+	Vector p_lookat = Vector(1.0f, 0.0f, 3.0f);
 	Vector p_up = Vector(0.0f, 1.0f, 0.0f);
-	Camera *camera = new FullCamera(0.5f, p_position, p_lookat, p_up);
+	Camera *camera = new FullCamera(0.6f, p_position, p_lookat, p_up);
 	
 	// Camera generates rays for each pixel in the framebuffer and records colour + depth.
 	camera->render(scene,*fb);

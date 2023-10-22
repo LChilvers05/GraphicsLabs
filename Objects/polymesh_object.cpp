@@ -174,9 +174,12 @@ Plane PolyMesh::get_face_plane(const vector<int>& tri,
 }
 
 void PolyMesh::apply_transform(Transform& trans) {
-    //TODO: must also transform face normals and planes
     for (int i = 0; i < vertex.size(); i++) {
         trans.apply(vertex[i]);
+    }
+    for (int i = 0; i < triangle_count; i++) {
+        trans.apply(face_normals[i]);
+        face_planes[i].apply_transform(trans);
     }
 }
 
@@ -187,9 +190,11 @@ void PolyMesh::set_material(Material* p_m) {
 }
 
 Hit* PolyMesh::intersection(Ray ray) {
+
     Hit* hits = 0;
+    Hit* curr_hit;
+
     for (int i = 0; i < triangle_count; i++) {
-        // compute plane of triangle with normal
         Vertex a = vertex[triangle[i][0]];
         Vertex b = vertex[triangle[i][1]];
         Vertex c = vertex[triangle[i][2]];
@@ -204,9 +209,17 @@ Hit* PolyMesh::intersection(Ray ray) {
         Vector n2 = (pos - b); n2.cross(edge2); n2.normalise();
         Vector n3 = (pos - c); n3.cross(edge3); n3.normalise();
 
-        if ((n1 - n2).length() == 0 && (n2 - n3).length() == 0) {
+        if ((n1 - n2).length() < 0.01f && (n2 - n3).length() < 0.01f) {
             // inside triangle
-            hits = hit;
+            if (hits == 0) {
+                hits = hit;
+                curr_hit = hit;
+            } else {
+                while (curr_hit->next != 0) {
+                    curr_hit = curr_hit->next;
+                }
+                curr_hit->next = hit;
+            }
         }
     }
 
