@@ -126,17 +126,32 @@ void PolyMesh::process_face(vector<string> raw_face) {
     try {
         // obj v index start from 1 not 0
         int a = stoi(split(raw_face[1], '/')[0]) - 1;
+        int a_n = stoi(split(raw_face[1], '/')[1]) - 1;
         // split a polygon into triangles
         for (int i = 2; i < raw_face.size() - 1; i++) {
             int b = stoi(split(raw_face[i], '/')[0]) - 1;
+            int b_n = stoi(split(raw_face[i], '/')[1]) - 1;
+
             int c = stoi(split(raw_face[i + 1], '/')[0]) - 1;
+            int c_n = stoi(split(raw_face[i + 1], '/')[1]) - 1;
 
             vector<int> tri;
             tri.push_back(a); tri.push_back(b); tri.push_back(c);
             triangle.push_back(tri);
+
+            vector<int> tri_n;
+            tri_n.push_back(a_n); tri_n.push_back(b_n); tri_n.push_back(c_n);
+            triangle_normals.push_back(tri_n);
         }
     } catch (const std::invalid_argument& e) {
         printf("Could not convert face point to int");
+    }
+}
+
+void PolyMesh::apply_transform(Transform& trans) {
+    for (int i = 0; i < vertex.size(); i++) {
+        trans.apply(vertex[i]);
+        trans.apply(vertex_normals[i]); //TODO: check this is fine
     }
 }
 
@@ -151,6 +166,40 @@ Vector PolyMesh::get_face_normal(const vector<int>& tri,
     // normal is cross product of two edges
     edge1.cross(edge2); Vector normal = edge1; normal.normalise();
     return normal;
+}
+
+void PolyMesh::interpolate_vertex_normals(
+    const vector<int>& tri,
+    const vector<Vertex>& vertex,
+    const vector<int>& tri_n,
+    const vector<Vector>& vertex_normal,
+    Hit*& hit
+    ) {
+    
+    // three vertices of triangle
+    Vertex a = vertex[tri[0]];
+    Vertex b = vertex[tri[1]];
+    Vertex c = vertex[tri[2]];
+
+    Vector v0 = b - a, v1 = c - a, v2 = hit->position - a;
+    float d00 = v0.dot(v0);
+    float d01 = v0.dot(v1);
+    float d11 = v1.dot(v1);
+    float d20 = v2.dot(v0);
+    float d21 = v2.dot(v1);
+    float denom = d00 * d11 - d01 * d01;
+    float v = (d11 * d20 - d01 * d21) / denom;
+    float w = (d00 * d21 - d01 * d20) / denom;
+    float u = 1.0f - v - w;
+    Vertex uvw = Vertex(u, v, w);
+
+    // three normals of triangle
+    Vector a_n = vertex_normal[tri_n[0]];
+    Vector b_n = vertex_normal[tri_n[1]];
+    Vector c_n = vertex_normal[tri_n[2]];
+
+    hit->normal = ((1 - uvw.x - uvw.y) * a_n) + (uvw.x * b_n) + (uvw.y * c_n);
+    hit->normal.normalise();
 }
 
 Plane PolyMesh::get_face_plane(const vector<int>& tri,
@@ -172,12 +221,6 @@ Plane PolyMesh::get_face_plane(const vector<int>& tri,
     return plane;
 }
 
-void PolyMesh::apply_transform(Transform& trans) {
-    for (int i = 0; i < vertex.size(); i++) {
-        trans.apply(vertex[i]);
-    }
-}
-
 Hit* PolyMesh::intersection(Ray ray) {
 
     Hit* hits = 0;
@@ -190,6 +233,16 @@ Hit* PolyMesh::intersection(Ray ray) {
         // detect a hit
         Hit* hit = plane.intersection(ray);
         if (hit == 0) { continue; }
+
+        if (true) { //TODO: flag for smooth or face render
+            interpolate_vertex_normals(
+                tri,
+                vertex,
+                triangle_normals[i], 
+                vertex_normals,
+                hit
+            );
+        }
 
         // check to see if hit is inside triangle (a, b, c)
         Vertex a = vertex[tri[0]];
@@ -227,17 +280,23 @@ void PolyMesh::register_hit(Hit*& hits, Hit*& new_hit) {
     }
 
     if (new_hit->t < curr_hit->t) {
+        // insert at front
+        if (curr_hit == hits) {
+            hits = new_hit;
+            return;
+        }
+
         // insert hit
         if (prev_hit != 0) {
             prev_hit->next = new_hit;
         }
 
-        new_hit->next = curr_hit;
-
-        // insert at front
-        if (curr_hit == hits) {
-            hits = new_hit;
+        //get to end of new hit
+        Hit* this_hit = new_hit;
+        while (this_hit->next != 0) {
+            this_hit = this_hit->next;
         }
+        this_hit->next = curr_hit;
 
     } else {
         // append hit

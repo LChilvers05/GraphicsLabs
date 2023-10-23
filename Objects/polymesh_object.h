@@ -31,8 +31,9 @@ public:
 
 	int triangle_count;
 	vector<Vertex> vertex;
-	vector<vector<int> > triangle;
 	vector<Vector> vertex_normals;
+	vector<vector<int> > triangle;
+	vector<vector<int> > triangle_normals;
 
 	Hit *intersection(Ray ray);
 	void apply_transform(Transform& trans);
@@ -49,6 +50,7 @@ private:
 	void process_vertex_normal(vector<string> raw_vertex_normal);
 	void process_face(vector<string> raw_face);
 	Vector get_face_normal(const vector<int>& tri, const vector<Vertex>& vertex);
+	void interpolate_vertex_normals(const vector<int>& tri, const vector<Vertex>& vertex, const vector<int>& tri_n, const vector<Vector>& vertex_normal, Hit*& hit);
 	Plane get_face_plane(const vector<int>& tri, const vector<Vertex>& vertex, const Vector& normal);
 	void register_hit(Hit*& hits, Hit*& new_hit);
 

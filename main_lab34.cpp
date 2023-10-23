@@ -81,12 +81,12 @@ int main(int argc, char *argv[]) {
 	// Setup the scene
 	build_scene(scene);
 
-	// Vertex p_position = Vertex(10.0f, 20.0f, -30.0f);
-	// Vector p_lookat = Vector(-1.0f, -2.0f, 3.0f);
-	// Vector p_up = Vector(0.0f, 1.0f, 0.0f);
-	Vertex p_position = Vertex(0.0f, 0.0f, -30.0f);
-	Vector p_lookat = Vector(0.0f, 0.0f, 2.0f);
+	Vertex p_position = Vertex(10.0f, 5.0f, -30.0f);
+	Vector p_lookat = Vector(-1.0f, -0.5f, 3.0f);
 	Vector p_up = Vector(0.0f, 1.0f, 0.0f);
+	// Vertex p_position = Vertex(0.0f, 0.0f, -30.0f);
+	// Vector p_lookat = Vector(0.0f, 0.0f, 2.0f);
+	// Vector p_up = Vector(0.0f, 1.0f, 0.0f);
 	Camera *camera = new FullCamera(0.6f, p_position, p_lookat, p_up);
 	
 	// Camera generates rays for each pixel in the framebuffer and records colour + depth.
