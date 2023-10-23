@@ -31,6 +31,7 @@
 using namespace std;
 
 PolyMesh::PolyMesh(char* file, bool smooth) {
+    smooth_render = false;
     read_file(file, smooth);
     next = 0;
 }
@@ -94,7 +95,7 @@ void PolyMesh::process_vertex(vector<string> raw_vertex) {
         Vertex v(
             stof(raw_vertex[1]), 
             stof(raw_vertex[2]),
-            stof(raw_vertex[3]) + 0.0001
+            stof(raw_vertex[3]) //+0.0001
         );
         vertex.push_back(v);
 
@@ -228,13 +229,19 @@ Hit* PolyMesh::intersection(Ray ray) {
         //make plane from triangle face
         vector<int> tri = triangle[i];
         Vector normal = get_face_normal(tri, vertex);
+
+        //TODO: not sure if this is good
+        if (normal.dot(ray.direction) > 0.0) {
+			normal.negate();
+		}
+        
         Plane plane = get_face_plane(tri, vertex, normal);
 
         // detect a hit
         Hit* hit = plane.intersection(ray);
         if (hit == 0) { continue; }
 
-        if (true) { //TODO: flag for smooth or face render
+        if (smooth_render) {
             interpolate_vertex_normals(
                 tri,
                 vertex,
@@ -256,7 +263,7 @@ Hit* PolyMesh::intersection(Ray ray) {
         Vector n3 = (pos - c); n3.cross(edge3); n3.normalise();
 
         // check inside triangle
-        if ((n1 - n2).length() < 0.001f && (n2 - n3).length() < 0.001f) {
+        if (n1.dot(n2) > 0.0f && n2.dot(n3) > 0.0f) {
             register_hit(hits, hit);
         }
     }

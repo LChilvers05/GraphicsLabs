@@ -35,6 +35,8 @@ public:
 	vector<vector<int> > triangle;
 	vector<vector<int> > triangle_normals;
 
+	bool smooth_render;
+
 	Hit *intersection(Ray ray);
 	void apply_transform(Transform& trans);
 
