@@ -50,4 +50,6 @@ private:
 	void process_face(vector<string> raw_face);
 	Vector get_face_normal(const vector<int>& tri, const vector<Vertex>& vertex);
 	Plane get_face_plane(const vector<int>& tri, const vector<Vertex>& vertex, const Vector& normal);
+	void register_hit(Hit*& hits, Hit*& new_hit);
+
 };

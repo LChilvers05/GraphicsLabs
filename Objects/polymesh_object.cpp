@@ -181,8 +181,6 @@ void PolyMesh::apply_transform(Transform& trans) {
 Hit* PolyMesh::intersection(Ray ray) {
 
     Hit* hits = 0;
-    Hit* curr_hit;
-    //TODO: the order of the triangles in the loop matters!
     for (int i = 0; i < triangle_count; i++) {
         //make plane from triangle face
         vector<int> tri = triangle[i];
@@ -204,19 +202,45 @@ Hit* PolyMesh::intersection(Ray ray) {
         Vector n2 = (pos - b); n2.cross(edge2); n2.normalise();
         Vector n3 = (pos - c); n3.cross(edge3); n3.normalise();
 
-        if ((n1 - n2).length() < 0.0001f && (n2 - n3).length() < 0.0001f) {
-            // inside triangle
-            if (hits == 0) {
-                hits = hit;
-                curr_hit = hit;
-                continue;
-            }
-            while (curr_hit->next != 0) {
-                curr_hit = curr_hit->next;
-            }
-            curr_hit->next = hit;
+        // check inside triangle
+        if ((n1 - n2).length() < 0.001f && (n2 - n3).length() < 0.001f) {
+            register_hit(hits, hit);
         }
     }
-    //TODO: need to sort hit linked list;
+
     return hits;
+}
+
+void PolyMesh::register_hit(Hit*& hits, Hit*& new_hit) {
+    // first
+    if (hits == 0) {
+        hits = new_hit;
+        return;
+    }
+
+    // loop from start to end or hit needs to be inserted
+    Hit* curr_hit = hits;
+    Hit* prev_hit = 0;
+    while (curr_hit->next != 0 && new_hit->t >= curr_hit->t) {
+        prev_hit = curr_hit;
+        curr_hit = curr_hit->next;
+    }
+
+    if (new_hit->t < curr_hit->t) {
+        // insert hit
+        if (prev_hit != 0) {
+            prev_hit->next = new_hit;
+        }
+
+        new_hit->next = curr_hit;
+
+        // insert at front
+        if (curr_hit == hits) {
+            hits = new_hit;
+        }
+
+    } else {
+        // append hit
+        curr_hit->next = new_hit;
+    }
 }
