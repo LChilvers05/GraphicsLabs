@@ -52,7 +52,13 @@ private:
 	void process_vertex_normal(vector<string> raw_vertex_normal);
 	void process_face(vector<string> raw_face);
 	Vector get_face_normal(const vector<int>& tri, const vector<Vertex>& vertex);
-	void interpolate_vertex_normals(const vector<int>& tri, const vector<Vertex>& vertex, const vector<int>& tri_n, const vector<Vector>& vertex_normal, Hit*& hit);
+	void interpolate_vertex_normals(
+		const vector<int>& tri, 
+		const vector<Vertex>& vertex, 
+		const vector<int>& tri_n, 
+		const vector<Vector>& vertex_normal, 
+		Hit*& hit
+	);
 	Plane get_face_plane(const vector<int>& tri, const vector<Vertex>& vertex, const Vector& normal);
 	void register_hit(Hit*& hits, Hit*& new_hit);
 

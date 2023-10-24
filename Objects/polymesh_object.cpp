@@ -152,7 +152,7 @@ void PolyMesh::process_face(vector<string> raw_face) {
 void PolyMesh::apply_transform(Transform& trans) {
     for (int i = 0; i < vertex.size(); i++) {
         trans.apply(vertex[i]);
-        trans.apply(vertex_normals[i]); //TODO: check this is fine
+        trans.apply(vertex_normals[i]);
     }
 }
 
@@ -175,7 +175,7 @@ void PolyMesh::interpolate_vertex_normals(
     const vector<int>& tri_n,
     const vector<Vector>& vertex_normal,
     Hit*& hit
-    ) {
+) {
     
     // three vertices of triangle
     Vertex a = vertex[tri[0]];
@@ -199,7 +199,7 @@ void PolyMesh::interpolate_vertex_normals(
     Vector b_n = vertex_normal[tri_n[1]];
     Vector c_n = vertex_normal[tri_n[2]];
 
-    hit->normal = ((1 - uvw.x - uvw.y) * a_n) + (uvw.x * b_n) + (uvw.y * c_n);
+    hit->normal = (uvw.x * a_n) + (uvw.y * b_n) + (uvw.z * c_n);
     hit->normal.normalise();
 }
 
@@ -230,7 +230,7 @@ Hit* PolyMesh::intersection(Ray ray) {
         vector<int> tri = triangle[i];
         Vector normal = get_face_normal(tri, vertex);
 
-        //TODO: not sure if this is good
+        // hack: render tri with normal same dir as ray
         if (normal.dot(ray.direction) > 0.0) {
 			normal.negate();
 		}
@@ -241,6 +241,7 @@ Hit* PolyMesh::intersection(Ray ray) {
         Hit* hit = plane.intersection(ray);
         if (hit == 0) { continue; }
 
+        // vertex normal ('smooth') render
         if (smooth_render) {
             interpolate_vertex_normals(
                 tri,
