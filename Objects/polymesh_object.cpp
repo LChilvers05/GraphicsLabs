@@ -128,14 +128,14 @@ void PolyMesh::process_face(vector<string> raw_face) {
     try {
         // obj v index start from 1 not 0
         int a = stoi(split(raw_face[1], '/')[0]) - 1;
-        int a_n = stoi(split(raw_face[1], '/')[1]) - 1;
+        int a_n = stoi(split(raw_face[1], '/')[2]) - 1;
         // split a polygon into triangles
         for (int i = 2; i < raw_face.size() - 1; i++) {
             int b = stoi(split(raw_face[i], '/')[0]) - 1;
-            int b_n = stoi(split(raw_face[i], '/')[1]) - 1;
+            int b_n = stoi(split(raw_face[i], '/')[2]) - 1;
 
             int c = stoi(split(raw_face[i + 1], '/')[0]) - 1;
-            int c_n = stoi(split(raw_face[i + 1], '/')[1]) - 1;
+            int c_n = stoi(split(raw_face[i + 1], '/')[2]) - 1;
 
             vector<int> tri;
             tri.push_back(a); tri.push_back(b); tri.push_back(c);
@@ -194,12 +194,13 @@ void PolyMesh::populate_vertex_normals() {
         // normal is sum of face normals / face count
         Vector vertex_normal = Vector(0, 0, 0);
         for (int j = 0; j < map[i].size(); j++) {
-            vertex_normal = vertex_normal + get_face_normal(map[i][j], vertex);
+            Vector face_normal = get_face_normal(map[i][j], vertex);
+            vertex_normal = vertex_normal + face_normal;
         }
         float tri_count = 1.0f/map[i].size();
         vertex_normal = vertex_normal * tri_count;
         vertex_normal.normalise();
-        
+
         vertex_normals.push_back(vertex_normal);
     }
 }
@@ -211,7 +212,6 @@ void PolyMesh::interpolate_vertex_normals(
     const vector<Vector>& vertex_normal,
     Hit*& hit) {
     
-    // three vertices of triangle
     Vertex a = vertex[tri[0]];
     Vertex b = vertex[tri[1]];
     Vertex c = vertex[tri[2]];
@@ -282,10 +282,11 @@ Hit* PolyMesh::intersection(Ray ray) {
                 populate_vertex_normals();
             }
 
+            vector<int> tri_n = triangle_normals[i];
             interpolate_vertex_normals(
                 tri,
                 vertex,
-                triangle_normals[i], 
+                tri_n, 
                 vertex_normals,
                 hit
             );
