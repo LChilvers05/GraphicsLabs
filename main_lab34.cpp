@@ -52,7 +52,7 @@ Sphere* make_sphere() {
 
 PolyMesh* make_teapot() {
 	PolyMesh* teapot = new PolyMesh((char *)"teapot-low.obj", false);
-	teapot->smooth_render = true;
+	teapot->smooth_render = false;
 	Transform * transform = new Transform(
 		1.0f, 0.0f, 0.0f, 0.0f,
 		0.0f, cos(90.0f), sin(90.0f), 0.0f,

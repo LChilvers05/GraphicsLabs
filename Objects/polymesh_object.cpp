@@ -20,6 +20,7 @@
 #include <plane_object.h>
 #include <stdlib.h>
 #include <vertex.h>
+#include <unordered_map>
 
 #include <fstream>
 #include <iostream>
@@ -169,28 +170,60 @@ Vector PolyMesh::get_face_normal(const vector<int>& tri,
     return normal;
 }
 
+void PolyMesh::populate_vertex_normals() {
+    // use face normals to compute vertex normals
+    unordered_map<int, vector< vector<int> > > map;
+    //fill map finding common vertex for tris
+    for (int i = 0; i < triangle_count; i++) {
+        vector<int> tri = triangle[i];
+        for (int j = 0; j < tri.size(); j++) {
+            int v = tri[j];
+            if (map.find(v) == map.end()) {
+                //not present - new tri arr
+                vector< vector<int> > tris;
+                tris.push_back(tri);
+                map[v] = tris;
+            } else {
+                map[v].push_back(tri);
+            }
+        }
+    }
+
+    //calculate vertex normals for each common vertex
+    for (int i = 0; i < map.size(); i++) {
+        // normal is sum of face normals / face count
+        Vector vertex_normal = Vector(0, 0, 0);
+        for (int j = 0; j < map[i].size(); j++) {
+            vertex_normal = vertex_normal + get_face_normal(map[i][j], vertex);
+        }
+        float tri_count = 1.0f/map[i].size();
+        vertex_normal = vertex_normal * tri_count;
+        vertex_normal.normalise();
+        
+        vertex_normals.push_back(vertex_normal);
+    }
+}
+
 void PolyMesh::interpolate_vertex_normals(
     const vector<int>& tri,
     const vector<Vertex>& vertex,
     const vector<int>& tri_n,
     const vector<Vector>& vertex_normal,
-    Hit*& hit
-) {
+    Hit*& hit) {
     
     // three vertices of triangle
     Vertex a = vertex[tri[0]];
     Vertex b = vertex[tri[1]];
     Vertex c = vertex[tri[2]];
 
-    Vector v0 = b - a, v1 = c - a, v2 = hit->position - a;
-    float d00 = v0.dot(v0);
-    float d01 = v0.dot(v1);
-    float d11 = v1.dot(v1);
-    float d20 = v2.dot(v0);
-    float d21 = v2.dot(v1);
-    float denom = d00 * d11 - d01 * d01;
-    float v = (d11 * d20 - d01 * d21) / denom;
-    float w = (d00 * d21 - d01 * d20) / denom;
+    Vector e1 = b - a, e2 = c - a, e3 = hit->position - a;
+    float d00 = e1.dot(e1); float d01 = e1.dot(e2);
+    float d11 = e2.dot(e2); float d20 = e3.dot(e1);
+    float d21 = e3.dot(e2);
+    float den = (d00 * d11) - (d01 * d01);
+
+    float v = ((d11 * d20) - (d01 * d21)) / den;
+    float w = ((d00 * d21) - (d01 * d20)) / den;
     float u = 1.0f - v - w;
     Vertex uvw = Vertex(u, v, w);
 
@@ -243,6 +276,12 @@ Hit* PolyMesh::intersection(Ray ray) {
 
         // vertex normal ('smooth') render
         if (smooth_render) {
+
+            if (vertex_normals.size() == 0) {
+                // 'vn' lines not present in OBJ
+                populate_vertex_normals();
+            }
+
             interpolate_vertex_normals(
                 tri,
                 vertex,

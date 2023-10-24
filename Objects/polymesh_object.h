@@ -57,9 +57,8 @@ private:
 		const vector<Vertex>& vertex, 
 		const vector<int>& tri_n, 
 		const vector<Vector>& vertex_normal, 
-		Hit*& hit
-	);
+		Hit*& hit);
 	Plane get_face_plane(const vector<int>& tri, const vector<Vertex>& vertex, const Vector& normal);
 	void register_hit(Hit*& hits, Hit*& new_hit);
-
+	void populate_vertex_normals();
 };
