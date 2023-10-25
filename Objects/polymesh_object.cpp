@@ -153,7 +153,9 @@ void PolyMesh::process_face(vector<string> raw_face) {
 void PolyMesh::apply_transform(Transform& trans) {
     for (int i = 0; i < vertex.size(); i++) {
         trans.apply(vertex[i]);
-        trans.apply(vertex_normals[i]);
+        if (vertex_normals.size() != 0) {
+            trans.apply(vertex_normals[i]);
+        }
     }
 }
 
@@ -164,44 +166,26 @@ Vector PolyMesh::get_face_normal(const vector<int>& tri,
     Vertex b = vertex[tri[1]];
     Vertex c = vertex[tri[2]];
     // two direction vectors (edges of triangle)
-    Vector edge1 = a - b; Vector edge2 = a - c;
+    Vector edge1 = b - a; Vector edge2 = c - a;
     // normal is cross product of two edges
     edge1.cross(edge2); Vector normal = edge1; normal.normalise();
     return normal;
 }
 
 void PolyMesh::populate_vertex_normals() {
-    // use face normals to compute vertex normals
-    unordered_map<int, vector< vector<int> > > map;
-    //fill map finding common vertex for tris
-    for (int i = 0; i < triangle_count; i++) {
-        vector<int> tri = triangle[i];
-        for (int j = 0; j < tri.size(); j++) {
-            int v = tri[j];
-            if (map.find(v) == map.end()) {
-                //not present - new tri arr
-                vector< vector<int> > tris;
-                tris.push_back(tri);
-                map[v] = tris;
-            } else {
-                map[v].push_back(tri);
-            }
-        }
+    for (int i = 0; i < vertex.size(); i++) {
+        vertex_normals.push_back(Vector(0, 0, 0));
     }
 
-    //calculate vertex normals for each common vertex
-    for (int i = 0; i < map.size(); i++) {
-        // normal is sum of face normals / face count
-        Vector vertex_normal = Vector(0, 0, 0);
-        for (int j = 0; j < map[i].size(); j++) {
-            Vector face_normal = get_face_normal(map[i][j], vertex);
-            vertex_normal = vertex_normal + face_normal;
-        }
-        float tri_count = 1.0f/map[i].size();
-        vertex_normal = vertex_normal * tri_count;
-        vertex_normal.normalise();
+    for (int i = 0; i < triangle_count; i++) {
+        Vector normal = get_face_normal(triangle[i], vertex);
+        vertex_normals[triangle_normals[i][0]] = vertex_normals[triangle_normals[i][0]]+ normal;
+        vertex_normals[triangle_normals[i][1]] = vertex_normals[triangle_normals[i][1]]+ normal;
+        vertex_normals[triangle_normals[i][2]] = vertex_normals[triangle_normals[i][2]]+ normal;
+    }
 
-        vertex_normals.push_back(vertex_normal);
+    for (int i = 0; i < vertex_normals.size(); i++) {
+        vertex_normals[i].normalise();
     }
 }
 
@@ -272,7 +256,10 @@ Hit* PolyMesh::intersection(Ray ray) {
 
         // detect a hit
         Hit* hit = plane.intersection(ray);
-        if (hit == 0) { continue; }
+        if (hit == 0) { 
+            delete hit;
+            continue;
+        }
 
         // vertex normal ('smooth') render
         if (smooth_render) {
