@@ -220,63 +220,53 @@ void PolyMesh::interpolate_vertex_normals(
     hit->normal.normalise();
 }
 
-Plane PolyMesh::get_face_plane(const vector<int>& tri,
-                               const vector<Vertex>& vertex,
-                               const Vector& normal) {
+bool PolyMesh::ray_does_intersect(
+    const Vector& normal,
+    const Vertex& a_v,
+    Ray ray,
+    Vertex& pos
+) {
     // compute plane of triangle
-    Vertex a = vertex[tri[0]];
-    Vertex b = vertex[tri[1]];
-    Vertex c = vertex[tri[2]];
     // Ax + By + Cz + D = 0
-    Plane plane = Plane(
-        normal.x, 
-        normal.y, 
-        normal.z,
-        (-normal.x * a.x) - (normal.y * a.y) - (normal.z * a.z)
-    );
+    float a = normal.x, b = normal.y, c = normal.z;
+    float d = (-normal.x * a_v.x) - (normal.y * a_v.y) - (normal.z * a_v.z);
+    
+    // check possible intersections
+    float U = a * ray.position.x + b * ray.position.y + c * ray.position.z + d;
+	float V = a * ray.direction.x + b * ray.direction.y + c * ray.direction.z;
 
-    plane.set_material(material);
-    return plane;
+	if (V > 0) {
+		float t = U/-V;
+		pos = ray.position + (ray.direction * t);
+		return true;
+
+	} else if (V < 0) {
+		float t = U / -V;
+		pos = ray.position + (ray.direction * t);
+		return true;
+	}
+
+    // does not intersect
+	return false;
 }
 
 Hit* PolyMesh::intersection(Ray ray) {
 
-    Hit* hits = 0;
+    Hit* hit = 0;
+
     for (int i = 0; i < triangle_count; i++) {
         //make plane from triangle face
         vector<int> tri = triangle[i];
         Vector normal = get_face_normal(tri, vertex);
-
         // hack: render tri with normal same dir as ray
         if (normal.dot(ray.direction) > 0.0) {
 			normal.negate();
 		}
         
-        Plane plane = get_face_plane(tri, vertex, normal);
-
-        // detect a hit
-        Hit* hit = plane.intersection(ray);
-        if (hit == 0) { 
-            delete hit;
+        // check the ray intersects with the plane
+        Vertex hit_pos;
+        if (!ray_does_intersect(normal, vertex[tri[0]], ray, hit_pos)) { 
             continue;
-        }
-
-        // vertex normal ('smooth') render
-        if (smooth_render) {
-
-            if (vertex_normals.size() == 0) {
-                // 'vn' lines not present in OBJ
-                populate_vertex_normals();
-            }
-
-            vector<int> tri_n = triangle_normals[i];
-            interpolate_vertex_normals(
-                tri,
-                vertex,
-                tri_n, 
-                vertex_normals,
-                hit
-            );
         }
 
         // check to see if hit is inside triangle (a, b, c)
@@ -284,57 +274,49 @@ Hit* PolyMesh::intersection(Ray ray) {
         Vertex b = vertex[tri[1]];
         Vertex c = vertex[tri[2]];
         Vector edge1 = b - a; Vector edge2 = c - b; Vector edge3 = a - c;
-        Vertex pos = hit->position;
         // check three normals for same direction
-        Vector n1 = (pos - a); n1.cross(edge1); n1.normalise();
-        Vector n2 = (pos - b); n2.cross(edge2); n2.normalise();
-        Vector n3 = (pos - c); n3.cross(edge3); n3.normalise();
+        Vector n1 = (hit_pos - a); n1.cross(edge1); n1.normalise();
+        Vector n2 = (hit_pos - b); n2.cross(edge2); n2.normalise();
+        Vector n3 = (hit_pos - c); n3.cross(edge3); n3.normalise();
 
         // check inside triangle
         if (n1.dot(n2) > 0.0f && n2.dot(n3) > 0.0f) {
-            register_hit(hits, hit);
+            vector<int> tri_n = triangle_normals[i];
+            register_hit(hit, ray, hit_pos, tri, tri_n, normal);
         }
     }
 
-    return hits;
+    return hit;
 }
 
-void PolyMesh::register_hit(Hit*& hits, Hit*& new_hit) {
-    // first
-    if (hits == 0) {
-        hits = new_hit;
-        return;
+void PolyMesh::register_hit(
+    Hit*& hit, 
+    const Ray ray, 
+    const Vertex hit_pos, 
+    const vector<int> tri,
+    const vector<int> tri_n,
+    const Vector normal
+) {
+    // init a hit
+    if (hit == 0) {
+        hit = new Hit();
+        hit->t = INFINITY;
     }
+    // check closest hit
+    float t = (ray.position - hit_pos).length();
+    if (t > hit->t) { return; }
 
-    // loop from start to end or hit needs to be inserted
-    Hit* curr_hit = hits;
-    Hit* prev_hit = 0;
-    while (curr_hit->next != 0 && new_hit->t >= curr_hit->t) {
-        prev_hit = curr_hit;
-        curr_hit = curr_hit->next;
-    }
+    hit->position = hit_pos;
+    hit->t = t;
+    hit->what = this;
+    hit->normal = normal;
 
-    if (new_hit->t < curr_hit->t) {
-        // insert at front
-        if (curr_hit == hits) {
-            hits = new_hit;
-            return;
+    // vertex normal ('smooth') render
+    if (smooth_render) {
+        if (vertex_normals.size() == 0) {
+            // 'vn' lines not present in OBJ
+            populate_vertex_normals();
         }
-
-        // insert hit
-        if (prev_hit != 0) {
-            prev_hit->next = new_hit;
-        }
-
-        //get to end of new hit
-        Hit* this_hit = new_hit;
-        while (this_hit->next != 0) {
-            this_hit = this_hit->next;
-        }
-        this_hit->next = curr_hit;
-
-    } else {
-        // append hit
-        curr_hit->next = new_hit;
+        interpolate_vertex_normals(tri, vertex, tri_n, vertex_normals, hit);
     }
 }

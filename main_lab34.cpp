@@ -51,7 +51,7 @@ Sphere* make_sphere() {
 }
 
 PolyMesh* make_teapot() {
-	PolyMesh* teapot = new PolyMesh((char *)"teapot-low.obj", false);
+	PolyMesh* teapot = new PolyMesh((char *)"teapot.obj", false);
 	teapot->smooth_render = true;
 	Transform * transform = new Transform(
 		1.0f, 0.0f, 0.0f, 0.0f,
@@ -95,7 +95,7 @@ int main(int argc, char *argv[]) {
 	camera->render(scene,*fb);
 	
 	// Output the framebuffer colour and depth as two images
-	fb->writeRGBFile((char *)"test3.ppm");
+	fb->writeRGBFile((char *)"high_teapot_smooth.ppm");
 	fb->writeDepthFile((char *)"depth.ppm");
 	
 	cerr << "\nDone.\n" << flush;

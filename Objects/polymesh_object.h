@@ -58,7 +58,19 @@ private:
 		const vector<int>& tri_n, 
 		const vector<Vector>& vertex_normal, 
 		Hit*& hit);
-	Plane get_face_plane(const vector<int>& tri, const vector<Vertex>& vertex, const Vector& normal);
-	void register_hit(Hit*& hits, Hit*& new_hit);
+	bool ray_does_intersect(
+    	const Vector& normal,
+    	const Vertex& a_v,
+    	const Ray ray,
+    	Vertex& pos
+	);
 	void populate_vertex_normals();
+    void register_hit(
+		Hit*& hit, 
+		const Ray ray, 
+		const Vertex hit_pos,
+    	const vector<int> tri_n, 
+		const vector<int> tri,
+        const Vector normal
+	);
 };
