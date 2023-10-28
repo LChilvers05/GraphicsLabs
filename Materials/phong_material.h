@@ -15,11 +15,12 @@
 class Phong : public Material {
 public:
 
-	Phong()
+	Phong(Colour ambient)
 	{
-
+		this->ambient = ambient;
 	}
 
+	Colour ambient;
 	Colour compute_once(Ray& viewer, Hit& hit, int recurse);
 	Colour compute_per_light(Vector& viewer, Hit& hit, Vector& ldir);
 	float get_diffuse(Hit& hit, const Vector& ldir);

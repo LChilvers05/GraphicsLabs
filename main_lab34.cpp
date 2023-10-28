@@ -46,12 +46,12 @@
 
 using namespace std;
 
-Sphere* make_sphere() {
-	return new Sphere(Vertex(12.0f, 6.0f, -10.0f), 5.0f);
+Sphere* make_sphere(const Vertex c, const float r) {
+	return new Sphere(c, r);
 }
 
 PolyMesh* make_teapot() {
-	PolyMesh* teapot = new PolyMesh((char *)"teapot-low.obj", false);
+	PolyMesh* teapot = new PolyMesh((char *)"teapot.obj", false);
 	teapot->smooth_render = true;
 	Transform * transform = new Transform(
 		1.0f, 0.0f, 0.0f, 0.0f,
@@ -64,23 +64,32 @@ PolyMesh* make_teapot() {
 }
 
 Light* make_light() {
-	Vector ldir = Vector(-0.5f, -0.25f, 4.0f);;
+	// Vector ldir = Vector(-3.0f, -0.25f, 4.0f); ldir.normalise();
+	Vector ldir = Vector(-3.0f, -0.25f, 1.0f); ldir.normalise();
+
 	Colour lColour = Colour(255.0f, 255.0f, 255.0f);
 	Light* light = new DirectionalLight(ldir, lColour);
 	return light;
 }
 
 void build_scene(Scene& scene) {
-	Phong *mat = new Phong();
+	Phong *red = new Phong(Colour(255.0f, 0.f, 0.f));
+	Phong *blue = new Phong(Colour(0.f, 0.f, 255.0f));
+	Phong *green = new Phong(Colour(0.f, 255.0f, 0.f));
 
-	Object* shadow_cause = make_sphere();
-	shadow_cause->set_material(mat);
+
+	Object* backing = make_sphere(Vertex(-30.0f, 0.0f, 30.0f), 30.0f);
+	backing->set_material(red);
+
+	Object* shadow_cause = make_sphere(Vertex(10.0f, 4.0f, -12.0f), 1.0f);
+	shadow_cause->set_material(blue);
 
   	Object* object = make_teapot();
-	object->set_material(mat);
+	object->set_material(green);
 	
 	scene.add_object(object);
 	scene.add_object(shadow_cause);
+	scene.add_object(backing);
 	scene.add_light(make_light());
 }
 

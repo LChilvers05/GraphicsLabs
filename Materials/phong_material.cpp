@@ -25,7 +25,7 @@
 
 // The compute_once() method supplies the ambient term.
 Colour Phong::compute_once(Ray& viewer, Hit& hit, int recurse) {
-	return Colour(255.0f, 0.0f, 0.0f);
+	return this->ambient;
 }
 
 // The compute_per_light() method supplies the diffuse and specular terms.

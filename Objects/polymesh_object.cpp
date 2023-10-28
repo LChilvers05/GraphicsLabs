@@ -234,15 +234,16 @@ bool PolyMesh::ray_does_intersect(
     // check possible intersections
     float U = a * ray.position.x + b * ray.position.y + c * ray.position.z + d;
 	float V = a * ray.direction.x + b * ray.direction.y + c * ray.direction.z;
-
-	if (V > 0) {
-		float t = U/-V;
-		pos = ray.position + (ray.direction * t);
-		return true;
-
-	} else if (V < 0) {
+    
+    if (V < 0) {
 		float t = U / -V;
 		pos = ray.position + (ray.direction * t);
+
+        //position behind starting point of ray - no intersection
+        if ((ray.position - pos).dot(ray.direction) > 0) {
+            return false;
+        }
+
 		return true;
 	}
 
