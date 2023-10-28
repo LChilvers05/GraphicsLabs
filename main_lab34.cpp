@@ -71,9 +71,9 @@ Light* make_light() {
 }
 
 void build_scene(Scene& scene) {
-  	// Object* object = make_teapot();
+  	Object* object = make_teapot();
 	// FalseColour *mat = new FalseColour();
-	Object* object = make_sphere();
+	// Object* object = make_sphere();
 	Phong *mat = new Phong();
 
 	object->set_material(mat);
@@ -94,18 +94,18 @@ int main(int argc, char *argv[]) {
 	// Setup the scene
 	build_scene(scene);
 
-	// Vertex p_position = Vertex(10.0f, 5.0f, -30.0f);
-	// Vector p_lookat = Vector(-1.0f, -0.5f, 3.0f);
-	// Vector p_up = Vector(0.0f, 1.0f, 0.0f);
-	// Camera *camera = new FullCamera(0.6f, p_position, p_lookat, p_up);
+	Vertex p_position = Vertex(10.0f, 5.0f, -30.0f);
+	Vector p_lookat = Vector(-1.0f, -0.5f, 3.0f);
+	Vector p_up = Vector(0.0f, 1.0f, 0.0f);
+	Camera *camera = new FullCamera(0.6f, p_position, p_lookat, p_up);
 
-	Camera *camera = new SimpleCamera();
+	// Camera *camera = new SimpleCamera();
 	
 	// Camera generates rays for each pixel in the framebuffer and records colour + depth.
 	camera->render(scene,*fb);
 	
 	// Output the framebuffer colour and depth as two images
-	fb->writeRGBFile((char *)"test3.ppm");
+	fb->writeRGBFile((char *)"test4.ppm");
 	fb->writeDepthFile((char *)"depth.ppm");
 	
 	cerr << "\nDone.\n" << flush;

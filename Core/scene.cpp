@@ -137,7 +137,7 @@ void Scene::raytrace(Ray ray, int recurse, Colour &colour, float &depth)
 		  Vector viewer;
 		  Vector ldir;
 
-		  viewer = -best_hit->position;
+		  viewer = -ray.direction; //-best_hit->position;
 		  viewer.normalise();
 
 		  bool lit;
