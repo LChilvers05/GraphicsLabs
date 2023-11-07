@@ -33,9 +33,9 @@ FullCamera::FullCamera(float f, Vertex& p_position, Vector& p_lookat, Vector& p_
 }
 
 void FullCamera::make_orthonormal_bases(Vertex& eye, Vertex& look, Vector& up) {
-    //w = eye - (look / |eye - look|)
+    //w = (eye - look) / |eye - look|
     float e_l = (1.0f/(eye - look).length());
-    this->w = eye - (look * e_l);
+    this->w = (eye - look) * e_l;
     //u = (w X up) / (|w X up|)
     Vector u = Vector(); w.cross(up, u); u.normalise();
     this->u = u;
