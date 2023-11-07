@@ -20,23 +20,33 @@
 
 #include <math.h>
 
-GlobalMaterial::GlobalMaterial(Environment* p_env, Colour p_reflect_weight, Colour p_refract_weight, float p_ior)
-{
-
+GlobalMaterial::GlobalMaterial(Environment* p_env, Colour p_reflect_weight, Colour p_refract_weight, float p_ior) {
+	environment = p_env;
+	reflect_weight = p_reflect_weight;
+	refract_weight = p_reflect_weight;
+	ior = p_ior;
 }
 
 
 // reflection and recursion computation
-Colour GlobalMaterial::compute_once(Ray& viewer, Hit& hit, int recurse)
-{
-	Colour result;
+Colour GlobalMaterial::compute_once(Ray& viewer, Hit& hit, int recurse) {
+	Colour colour; float depth;
 
+	if (recurse == 0) { return colour; }
 
-	return result;
+	// the reflection ray
+	Ray rray;
+	rray.direction = viewer.direction - ((2.0 * hit.normal.dot(viewer.direction)) * hit.normal);
+	rray.position = hit.position + (0.000001f * rray.direction);
+
+	//manipulates colour
+	environment->raytrace(rray, recurse-1, colour, depth);
+
+	colour *= reflect_weight;
+	return colour;
 }
 
-Colour GlobalMaterial::compute_per_light(Vector& viewer, Hit& hit, Vector& ldir)
-{
+Colour GlobalMaterial::compute_per_light(Vector& viewer, Hit& hit, Vector& ldir) {
 	Colour result;
 
 	result.r=0.0f;
