@@ -64,9 +64,8 @@ Hit *Sphere::intersection(Ray ray)
 	hit0->position = ray.position + hit0->t * ray.direction;
 	hit0->normal = hit0->position - center;
 	hit0->normal.normalise();
-
-	if (hit0->normal.dot(ray.direction) > 0.0)
-	{
+	hit0->r_normal = hit0->normal;
+	if (hit0->normal.dot(ray.direction) > 0.0) {
 		hit0->normal.negate();
 	}
 
@@ -78,9 +77,8 @@ Hit *Sphere::intersection(Ray ray)
 	hit1->position = ray.position + hit1->t * ray.direction;
 	hit1->normal = hit1->position - center;
 	hit1->normal.normalise();
-
-	if (hit1->normal.dot(ray.direction) > 0.0)
-	{
+	hit1->r_normal = hit1->normal;
+	if (hit1->normal.dot(ray.direction) > 0.0) {
 		hit1->normal.negate();
 	}
 

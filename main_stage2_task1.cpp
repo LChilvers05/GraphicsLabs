@@ -58,26 +58,30 @@ void build_scene(Scene& scene) {
 	GlobalMaterial* mirror = new GlobalMaterial(
 		Colour(255.f, 255.f, 255.f),
 		&scene, 
-		Colour(0.5f, 0.5f, 0.5f), 
-		Colour(0.5f, 0.5f, 0.5f), 
-		1.0f
+		Colour(0.9f, 0.9f, 0.9f), 
+		Colour(0.1f, 0.1f, 0.1f), 
+		1.52f
 	);
-	Sphere* mirror_sphere = make_sphere(Vertex(0.f, 5.f, 0.f), 3.0f, mirror);
+	Sphere* mirror_sphere = make_sphere(Vertex(0.f, 7.f, 0.f), 3.0f, mirror);
 	scene.add_object(mirror_sphere);
 
 	GlobalMaterial* red_mirror = new GlobalMaterial(
 		Colour(255.f, 0.f, 0.f),
 		&scene, 
 		Colour(0.5f, 0.5f, 0.5f), 
-		Colour(0.5f, 0.5f, 0.5f), 
-		1.0f
+		Colour(0.8f, 0.8f, 0.8f), 
+		1.52f
 	);
 	Sphere* red_mirror_sphere = make_sphere(Vertex(3.f, 3.f, -3.f), 1.0f, red_mirror);
-	scene.add_object(red_mirror_sphere);
+	// scene.add_object(red_mirror_sphere);
 
 	Phong* green = new Phong(Colour(0.f, 255.f, 0.f));
 	Sphere* green_sphere = make_sphere(Vertex(-1.0f, 3.0f, -3.0f), 1.0f, green);
 	scene.add_object(green_sphere);
+
+	Phong* blue = new Phong(Colour(0.f, 0.f, 255.f));
+	Sphere* blue_sphere = make_sphere(Vertex(2.f, 5.f, 8.f), 3.0f, blue);
+	scene.add_object(blue_sphere);
 
 	Vector left_light_dir = Vector(1.f, -1.f, 1.f);
 	scene.add_light(make_light(left_light_dir));
@@ -103,7 +107,7 @@ int main(int argc, char *argv[]) {
 	camera->render(scene,*fb);
 	
 	// Output the framebuffer colour and depth as two images
-	fb->writeRGBFile((char *)"stage2_reflection.ppm");
+	fb->writeRGBFile((char *)"stage2_refraction.ppm");
 	// fb->writeDepthFile((char *)"depth.ppm");
 	
 	cerr << "\nDone.\n" << flush;

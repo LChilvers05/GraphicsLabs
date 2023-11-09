@@ -20,6 +20,7 @@
 #include "phong_material.h"
 
 #include <math.h>
+#include <algorithm>
 
 GlobalMaterial::GlobalMaterial(
 	Colour p_ambient,
@@ -35,27 +36,67 @@ GlobalMaterial::GlobalMaterial(
 	ior = p_ior;
 }
 
-
 // reflection and recursion computation
-Colour GlobalMaterial::compute_once(Ray& viewer, Hit& hit, int recurse) {
-	Colour colour = ambient; float depth;
+Colour GlobalMaterial::compute_once(Ray& viewer, Hit& hit, int recurse) { 
+	if (recurse == 0) { return ambient; }
 
-	if (recurse == 0) { return colour; }
+	float depth;
+	Colour reflect_colour = ambient, kr = reflect_weight;
+	Colour refract_colour = ambient, kt = refract_weight;
 
 	// the reflection ray
+	Ray rray = create_reflection_ray(viewer, hit);
+	environment->raytrace(rray, recurse-1, reflect_colour, depth);
+
+	// the refraction ray
+	Ray tray = create_refraction_ray(viewer, hit, ior);
+	environment->raytrace(tray, recurse-1, refract_colour, depth);
+
+	return (kt * refract_colour) + (kr * reflect_colour);
+}
+
+Ray GlobalMaterial::create_reflection_ray(const Ray& viewer, Hit& hit) {
 	Ray rray;
 	rray.direction = viewer.direction - ((2.0 * hit.normal.dot(viewer.direction)) * hit.normal);
 	rray.position = hit.position + (0.0001f * rray.direction);
+	return rray;
+}
 
-	//manipulates colour
-	environment->raytrace(rray, recurse-1, colour, depth);
+Ray GlobalMaterial::create_refraction_ray(Ray& viewer, Hit& hit, const float ior) {
+	float n = ior;
+	float cos_i = hit.r_normal.dot(viewer.direction);
 
-	colour *= reflect_weight;
-	return colour;
+	if (cos_i < 0) { 
+		// entering object
+		cos_i = -cos_i;
+	} else {
+		// exiting object
+		hit.r_normal.negate();
+		n = 1/n; 
+	}
+
+	const float k = 1.f - (1/(n*n)) * (1.f - (cos_i * cos_i));
+
+	Ray tray;
+	// return nothing if total internal reflection
+	if (k < 0) { return tray; }
+	const float cos_t = sqrtf(k);
+	
+	tray.direction = ((1/n) * viewer.direction) - ((cos_t - ((1/n) * cos_i)) * hit.r_normal);
+	tray.position = hit.position + (0.0001f * tray.direction); 
+
+	// Fresnel term
+	// float r_par = (ior*cos_i - cos_t) / (ior*cos_i + cos_t);
+	// float r_per = (cos_i - ior*cos_t) / (cos_i + ior*cos_t);
+	// float k_r = 0.5f * ((r_par*r_par) + (r_per*r_per));
+	// float k_t = 1.f - k_r;
+	// refract_weight = Colour(k_t, k_t, k_t);
+
+	return tray;
 }
 
 Colour GlobalMaterial::compute_per_light(Vector& viewer, Hit& hit, Vector& ldir) {
+	// reuse Phong for diffuse and specular term
 	Phong* phong = new Phong(ambient);
 	return phong->compute_per_light(viewer, hit, ldir);
 }
-

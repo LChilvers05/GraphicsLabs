@@ -33,5 +33,7 @@ public:
 	GlobalMaterial(Colour p_ambient, Environment* p_env, Colour p_reflect_weight, Colour p_refract_weight, float ior);
 	Colour compute_once(Ray& viewer, Hit& hit, int recurse);
 	Colour compute_per_light(Vector& viewer, Hit& hit, Vector& ldir);
+	Ray create_reflection_ray(const Ray& viewer, Hit& hit);
+	Ray create_refraction_ray(Ray& viewer, Hit& hit, const float ior);
 };
 
