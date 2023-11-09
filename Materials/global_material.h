@@ -24,16 +24,14 @@
 
 class GlobalMaterial: public Material {
 public:
+	Colour ambient;
 	Colour reflect_weight;
 	Colour refract_weight;
 	float ior;
 	Environment* environment;
 
-	GlobalMaterial(Environment* p_env, Colour p_reflect_weight, Colour p_refract_weight, float ior);
-
+	GlobalMaterial(Colour p_ambient, Environment* p_env, Colour p_reflect_weight, Colour p_refract_weight, float ior);
 	Colour compute_once(Ray& viewer, Hit& hit, int recurse);
-
 	Colour compute_per_light(Vector& viewer, Hit& hit, Vector& ldir);
-
 };
 

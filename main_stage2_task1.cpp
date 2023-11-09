@@ -25,74 +25,77 @@
 
 using namespace std;
 
-Sphere* make_sphere(const Vertex c, const float r) {
-	return new Sphere(c, r);
+Sphere* make_sphere(const Vertex c, const float r, Material* m) {
+	Sphere* s = new Sphere(c,r);
+	s->set_material(m);
+	return s;
 }
 
-PolyMesh* make_teapot() {
-	PolyMesh* teapot = new PolyMesh((char *)"teapot-low.obj", false);
-	teapot->smooth_render = true;
-	Transform * transform = new Transform(
-		1.0f, 0.0f, 0.0f, 0.0f,
-		0.0f, cos(90.0f), sin(90.0f), 0.0f,
-		0.0f, -sin(90.0f), cos(90.0f), 0.0f,
-		0.0f, 0.0f, 0.0f, 1.0f
-  	); 
-	teapot->apply_transform(*transform);
-	return teapot;
-}
-
-Light* make_light() {
-	Vector ldir = Vector(-3.0f, -0.25f, 1.0f); ldir.normalise();
+Light* make_light(Vector& ldir) {
+	ldir.normalise();
 	Colour lColour = Colour(255.0f, 255.0f, 255.0f);
 	Light* light = new DirectionalLight(ldir, lColour);
 	return light;
 }
 
-void build_scene(Scene& scene) {
-	GlobalMaterial* mat = new GlobalMaterial();
-  	Object* object = make_teapot();
-	object->set_material(mat);
-	
-	scene.add_object(object);
-	scene.add_light(make_light());
+Plane* make_floor() {
+	Vector normal = Vector(0.f, 1.f, -0.01f);
+	Plane* floor = new Plane(
+		normal.x,
+		normal.y,
+		normal.z,
+		-(normal.z * 20.f)
+	);
+
+	Phong* light_grey = new Phong(Colour(211.f, 211.f, 211.f));
+	floor->set_material(light_grey);
+	return floor;
 }
 
-void build_scene_lab_4(Scene& scene) {
-	Phong *red = new Phong(Colour(255.0f, 0.f, 0.f));
-	Phong *blue = new Phong(Colour(0.f, 0.f, 255.0f));
-	Phong *green = new Phong(Colour(0.f, 255.0f, 0.f));
+void build_scene(Scene& scene) {
+	scene.add_object(make_floor());
 
-	Object* backing = make_sphere(Vertex(-30.0f, 0.0f, 30.0f), 30.0f);
-	backing->set_material(red);
+	GlobalMaterial* mirror = new GlobalMaterial(
+		Colour(255.f, 255.f, 255.f),
+		&scene, 
+		Colour(0.5f, 0.5f, 0.5f), 
+		Colour(0.5f, 0.5f, 0.5f), 
+		1.0f
+	);
+	Sphere* mirror_sphere = make_sphere(Vertex(0.f, 5.f, 0.f), 3.0f, mirror);
+	scene.add_object(mirror_sphere);
 
-	Object* shadow_cause = make_sphere(Vertex(10.0f, 4.0f, -12.0f), 1.0f);
-	shadow_cause->set_material(blue);
+	GlobalMaterial* red_mirror = new GlobalMaterial(
+		Colour(255.f, 0.f, 0.f),
+		&scene, 
+		Colour(0.5f, 0.5f, 0.5f), 
+		Colour(0.5f, 0.5f, 0.5f), 
+		1.0f
+	);
+	Sphere* red_mirror_sphere = make_sphere(Vertex(3.f, 3.f, -3.f), 1.0f, red_mirror);
+	scene.add_object(red_mirror_sphere);
 
-  	Object* object = make_teapot();
-	object->set_material(green);
-	
-	scene.add_object(object);
-	scene.add_object(shadow_cause);
-	scene.add_object(backing);
-	scene.add_light(make_light());
+	Phong* green = new Phong(Colour(0.f, 255.f, 0.f));
+	Sphere* green_sphere = make_sphere(Vertex(-1.0f, 3.0f, -3.0f), 1.0f, green);
+	scene.add_object(green_sphere);
+
+	Vector left_light_dir = Vector(1.f, -1.f, 1.f);
+	scene.add_light(make_light(left_light_dir));
 }
 
 // This is the entry point function to the program.
 int main(int argc, char *argv[]) {
-	int width = 512;
-	int height = 512;
 	// Create a framebuffer
-	FrameBuffer* fb = new FrameBuffer(width, height);
+	FrameBuffer* fb = new FrameBuffer(512, 512);
 	
 	// Create a scene
 	Scene scene;
 	
 	// Setup the scene
-	build_scene_lab_4(scene);
+	build_scene(scene);
 
-	Vertex p_position = Vertex(10.0f, 5.0f, -30.0f);
-	Vector p_lookat = Vector(-0.9f, -0.1f, 3.0f);
+	Vertex p_position = Vertex(0.0f, 5.0f, -12.0f);
+	Vector p_lookat = Vector(0.0f, 0.0f, 1.0f);
 	Vector p_up = Vector(0.0f, 1.0f, 0.0f);
 	Camera *camera = new FullCamera(0.6f, p_position, p_lookat, p_up);
 	
@@ -100,7 +103,7 @@ int main(int argc, char *argv[]) {
 	camera->render(scene,*fb);
 	
 	// Output the framebuffer colour and depth as two images
-	fb->writeRGBFile((char *)"test4.ppm");
+	fb->writeRGBFile((char *)"stage2_reflection.ppm");
 	// fb->writeDepthFile((char *)"depth.ppm");
 	
 	cerr << "\nDone.\n" << flush;

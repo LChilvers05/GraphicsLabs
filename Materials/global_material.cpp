@@ -17,10 +17,18 @@
 */
 
 #include "global_material.h"
+#include "phong_material.h"
 
 #include <math.h>
 
-GlobalMaterial::GlobalMaterial(Environment* p_env, Colour p_reflect_weight, Colour p_refract_weight, float p_ior) {
+GlobalMaterial::GlobalMaterial(
+	Colour p_ambient,
+	Environment* p_env, 
+	Colour p_reflect_weight, 
+	Colour p_refract_weight, 
+	float p_ior
+) {
+	ambient = p_ambient;
 	environment = p_env;
 	reflect_weight = p_reflect_weight;
 	refract_weight = p_reflect_weight;
@@ -30,14 +38,14 @@ GlobalMaterial::GlobalMaterial(Environment* p_env, Colour p_reflect_weight, Colo
 
 // reflection and recursion computation
 Colour GlobalMaterial::compute_once(Ray& viewer, Hit& hit, int recurse) {
-	Colour colour; float depth;
+	Colour colour = ambient; float depth;
 
 	if (recurse == 0) { return colour; }
 
 	// the reflection ray
 	Ray rray;
 	rray.direction = viewer.direction - ((2.0 * hit.normal.dot(viewer.direction)) * hit.normal);
-	rray.position = hit.position + (0.000001f * rray.direction);
+	rray.position = hit.position + (0.0001f * rray.direction);
 
 	//manipulates colour
 	environment->raytrace(rray, recurse-1, colour, depth);
@@ -47,12 +55,7 @@ Colour GlobalMaterial::compute_once(Ray& viewer, Hit& hit, int recurse) {
 }
 
 Colour GlobalMaterial::compute_per_light(Vector& viewer, Hit& hit, Vector& ldir) {
-	Colour result;
-
-	result.r=0.0f;
-	result.g=0.0f;
-	result.b=0.0f;
-
-	return result;
+	Phong* phong = new Phong(ambient);
+	return phong->compute_per_light(viewer, hit, ldir);
 }
 
