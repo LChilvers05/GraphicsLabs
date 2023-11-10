@@ -42,7 +42,6 @@ public:
 	Object   *what;		    // the primitive object that has been hit
 	Vertex    position;	    // the position of intersection
 	Vector    normal;		// the normal at the point of intersection
-	Vector    r_normal; // a second normal used for refraction materials
 	TexCoords coordinates;  // the texture coordinates at the point of intersection
 
 	void* operator new(size_t size);

@@ -45,13 +45,14 @@ Colour GlobalMaterial::compute_once(Ray& viewer, Hit& hit, int recurse) {
 
 	// fresnel term
 	float n = ior;
-	float cos_i = hit.r_normal.dot(viewer.direction), cos_t;
+	float cos_i = hit.normal.dot(viewer.direction), cos_t;
 	bool is_tir = false;
 	fresnel(n, cos_i, cos_t, hit, is_tir);
 
 	// reflection
 	result = result + get_reflection_colour(viewer, hit, recurse);
 
+	// is total internal reflection
 	if (is_tir) return result;
 
 	// refraction
@@ -80,7 +81,7 @@ Colour GlobalMaterial::get_reflection_colour(const Ray& viewer, Hit& hit, const 
 
 Colour GlobalMaterial::get_refraction_colour(Ray& viewer, Hit& hit, const int recurse, const float n, const float cos_i, const float cos_t) {
 	Ray tray;
-	tray.direction = ((1/n) * viewer.direction) - ((cos_t - ((1/n) * cos_i)) * hit.r_normal);
+	tray.direction = ((1/n) * viewer.direction) - ((cos_t - ((1/n) * cos_i)) * hit.normal);
 	tray.position = hit.position + (0.0001f * tray.direction); 
 
 	Colour colour; float depth;
@@ -91,14 +92,11 @@ Colour GlobalMaterial::get_refraction_colour(Ray& viewer, Hit& hit, const int re
 }
 
 void GlobalMaterial::fresnel(float& n, float& cos_i, float& cos_t, Hit& hit, bool& is_tir) {
-	if (cos_i < 0) { 
-		// entering object
-		cos_i = -cos_i;
-	} else {
-		// exiting object
-		hit.r_normal.negate();
-		n = 1/n; 
-	}
+	
+	// angle must be positive
+	cos_i = abs(cos_i);
+	// flip index of refraction if exiting
+	if (!hit.entering) n = 1/n;
 
 	float kr;
 	float tir = 1.f - (1/(n*n)) * (1.f - (cos_i * cos_i));
@@ -116,7 +114,7 @@ void GlobalMaterial::fresnel(float& n, float& cos_i, float& cos_t, Hit& hit, boo
 		float r_per = (cos_i - ior*cos_t) / (cos_i + ior*cos_t);
 		kr = (r_par*r_par + r_per*r_per)/2.f;
 	}
-	
+
 	float kt = 1.f - kr;
 	reflect_weight = Colour(kr, kr, kr);
 	refract_weight = Colour(kt, kt, kt);

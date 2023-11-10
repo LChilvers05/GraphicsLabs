@@ -31,6 +31,19 @@ Sphere* make_sphere(const Vertex c, const float r, Material* m) {
 	return s;
 }
 
+PolyMesh* make_teapot() {
+	PolyMesh* teapot = new PolyMesh((char *)"teapot-low.obj", false);
+	teapot->smooth_render = true;
+	Transform * transform = new Transform(
+		1.0f, 0.0f, 0.0f, 0.0f,
+		0.0f, 0.f, 1.f, 0.0f,
+		0.0f, -1.f, 0.f, 0.0f,
+		0.0f, 0.0f, 0.0f, 1.0f
+  	); 
+	teapot->apply_transform(*transform);
+	return teapot;
+}
+
 Light* make_light(Vector& ldir) {
 	ldir.normalise();
 	Colour lColour = Colour(255.0f, 255.0f, 255.0f);
@@ -47,7 +60,7 @@ Plane* make_floor() {
 		-(normal.z * 20.f)
 	);
 
-	Phong* light_grey = new Phong(Colour(211.f, 211.f, 211.f));
+	Phong* light_grey = new Phong(Colour(50.f, 211.f, 50.f));
 	floor->set_material(light_grey);
 	return floor;
 }
@@ -63,28 +76,36 @@ void build_scene(Scene& scene) {
 		&scene, 
 		Colour(0.9f, 0.9f, 0.9f), 
 		Colour(0.1f, 0.1f, 0.1f), 
-		1.33f
-	);
-	Sphere* mirror_sphere = make_sphere(Vertex(0.f, 7.f, 0.f), 3.0f, mirror);
-	scene.add_object(mirror_sphere);
-
-	GlobalMaterial* red_mirror = new GlobalMaterial(
-		Colour(255.f, 0.f, 0.f),
-		&scene, 
-		Colour(0.5f, 0.5f, 0.5f), 
-		Colour(0.8f, 0.8f, 0.8f), 
 		1.52f
 	);
-	Sphere* red_mirror_sphere = make_sphere(Vertex(3.f, 3.f, -3.f), 1.0f, red_mirror);
+	Sphere* mirror_sphere = make_sphere(Vertex(0.f, 8.f, -5.f), 4.0f, mirror);
+	scene.add_object(mirror_sphere);
+
+	// Object* teapot = make_teapot();
+	// teapot->set_material(mirror);
+	// scene.add_object(teapot);
+
+	// GlobalMaterial* red_mirror = new GlobalMaterial(
+	// 	Colour(255.f, 0.f, 0.f),
+	// 	&scene, 
+	// 	Colour(0.5f, 0.5f, 0.5f), 
+	// 	Colour(0.8f, 0.8f, 0.8f), 
+	// 	1.52f
+	// );
+	// Sphere* red_mirror_sphere = make_sphere(Vertex(3.f, 3.f, -3.f), 1.0f, red_mirror);
 	// scene.add_object(red_mirror_sphere);
 
-	Phong* green = new Phong(Colour(0.f, 255.f, 0.f));
-	Sphere* green_sphere = make_sphere(Vertex(-3.0f, 3.0f, -3.0f), 1.0f, green);
-	scene.add_object(green_sphere);
+	Phong* red = new Phong(Colour(255.f, 0.f, 0.f));
+	Sphere* red_sphere = make_sphere(Vertex(-3.f, 7.f, 3.f), 2.0f, red);
+	scene.add_object(red_sphere);
 
 	Phong* blue = new Phong(Colour(0.f, 0.f, 255.f));
-	Sphere* blue_sphere = make_sphere(Vertex(2.f, 7.f, 8.f), 2.0f, blue);
+	Sphere* blue_sphere = make_sphere(Vertex(3.f, 7.f, 3.f), 2.0f, blue);
 	scene.add_object(blue_sphere);
+
+	Phong* pink = new Phong(Colour(255.f, 192.f, 203.f));
+	Sphere* pink_sphere = make_sphere(Vertex(-3.f, 7.f, -12.f), 1.0f, pink);
+	scene.add_object(pink_sphere);
 }
 
 // This is the entry point function to the program.
@@ -98,7 +119,7 @@ int main(int argc, char *argv[]) {
 	// Setup the scene
 	build_scene(scene);
 
-	Vertex p_position = Vertex(0.0f, 5.0f, -12.0f);
+	Vertex p_position = Vertex(0.0f, 7.0f, -20.0f);
 	Vector p_lookat = Vector(0.0f, 0.0f, 1.0f);
 	Vector p_up = Vector(0.0f, 1.0f, 0.0f);
 	Camera *camera = new FullCamera(0.6f, p_position, p_lookat, p_up);
