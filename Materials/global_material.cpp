@@ -20,20 +20,21 @@
 #include "phong_material.h"
 
 #include <math.h>
-#include <algorithm>
 
 GlobalMaterial::GlobalMaterial(
 	Colour p_ambient,
 	Environment* p_env, 
 	Colour p_reflect_weight, 
 	Colour p_refract_weight, 
-	float p_ior
+	float p_ior,
+	bool p_uses_fresnel
 ) {
 	ambient = p_ambient;
 	environment = p_env;
 	reflect_weight = p_reflect_weight;
 	refract_weight = p_refract_weight;
 	ior = p_ior;
+	uses_fresnel = p_uses_fresnel;
 }
 
 // reflection and recursion computation
@@ -116,6 +117,8 @@ void GlobalMaterial::fresnel(float& n, float& cos_i, float& cos_t, Hit& hit, boo
 	}
 
 	float kt = 1.f - kr;
-	reflect_weight = Colour(kr, kr, kr);
-	refract_weight = Colour(kt, kt, kt);
+	if (uses_fresnel) {
+		reflect_weight = Colour(kr, kr, kr);
+		refract_weight = Colour(kt, kt, kt);
+	}
 }

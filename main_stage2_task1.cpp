@@ -74,16 +74,17 @@ void build_scene(Scene& scene) {
 	GlobalMaterial* mirror = new GlobalMaterial(
 		Colour(255.f, 255.f, 255.f),
 		&scene, 
-		Colour(0.9f, 0.9f, 0.9f), 
 		Colour(0.1f, 0.1f, 0.1f), 
-		1.52f
+		Colour(0.9f, 0.9f, 0.9f), 
+		1.52f,
+		false
 	);
 	Sphere* mirror_sphere = make_sphere(Vertex(0.f, 8.f, -5.f), 4.0f, mirror);
-	scene.add_object(mirror_sphere);
+	// scene.add_object(mirror_sphere);
 
-	// Object* teapot = make_teapot();
-	// teapot->set_material(mirror);
-	// scene.add_object(teapot);
+	Object* teapot = make_teapot();
+	teapot->set_material(mirror);
+	scene.add_object(teapot);
 
 	// GlobalMaterial* red_mirror = new GlobalMaterial(
 	// 	Colour(255.f, 0.f, 0.f),
@@ -97,15 +98,15 @@ void build_scene(Scene& scene) {
 
 	Phong* red = new Phong(Colour(255.f, 0.f, 0.f));
 	Sphere* red_sphere = make_sphere(Vertex(-3.f, 7.f, 3.f), 2.0f, red);
-	scene.add_object(red_sphere);
+	// scene.add_object(red_sphere);
 
 	Phong* blue = new Phong(Colour(0.f, 0.f, 255.f));
 	Sphere* blue_sphere = make_sphere(Vertex(3.f, 7.f, 3.f), 2.0f, blue);
-	scene.add_object(blue_sphere);
+	// scene.add_object(blue_sphere);
 
 	Phong* pink = new Phong(Colour(255.f, 192.f, 203.f));
 	Sphere* pink_sphere = make_sphere(Vertex(-3.f, 7.f, -12.f), 1.0f, pink);
-	scene.add_object(pink_sphere);
+	// scene.add_object(pink_sphere);
 }
 
 // This is the entry point function to the program.

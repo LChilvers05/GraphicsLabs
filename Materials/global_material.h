@@ -29,8 +29,9 @@ public:
 	Colour refract_weight;
 	float ior;
 	Environment* environment;
+	bool uses_fresnel;
 
-	GlobalMaterial(Colour p_ambient, Environment* p_env, Colour p_reflect_weight, Colour p_refract_weight, float ior);
+	GlobalMaterial(Colour p_ambient, Environment* p_env, Colour p_reflect_weight, Colour p_refract_weight, float ior, bool p_uses_fresnel);
 	Colour compute_once(Ray& viewer, Hit& hit, int recurse);
 	Colour compute_per_light(Vector& viewer, Hit& hit, Vector& ldir);
 	Colour get_reflection_colour(const Ray& viewer, Hit& hit, const int recurse);

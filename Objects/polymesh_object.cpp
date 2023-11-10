@@ -259,16 +259,12 @@ Hit* PolyMesh::intersection(Ray ray) {
         //make plane from triangle face
         vector<int> tri = triangle[i];
         Vector normal = get_face_normal(tri, vertex);
-        // hack: render tri with normal same dir as ray
-        if (normal.dot(ray.direction) > 0.0) {
-			normal.negate();
-		}
+        
+        if (normal.dot(ray.direction) > 0.0) normal.negate();
         
         // check the ray intersects with the plane
         Vertex hit_pos;
-        if (!ray_does_intersect(normal, vertex[tri[0]], ray, hit_pos)) { 
-            continue;
-        }
+        if (!ray_does_intersect(normal, vertex[tri[0]], ray, hit_pos)) continue;
 
         // check to see if hit is inside triangle (a, b, c)
         Vertex a = vertex[tri[0]];
@@ -312,12 +308,12 @@ void PolyMesh::register_hit(
     hit->what = this;
     hit->normal = normal;
 
+    // 'vn' lines not present in OBJ
+    if (vertex_normals.size() == 0) populate_vertex_normals();
+
+    // ray is exiting if in similar direction to a close by vertex normal
+    hit->entering = (vertex_normals[tri_n[0]].dot(ray.direction) < 0);
+
     // vertex normal ('smooth') render
-    if (smooth_render) {
-        if (vertex_normals.size() == 0) {
-            // 'vn' lines not present in OBJ
-            populate_vertex_normals();
-        }
-        interpolate_vertex_normals(tri, vertex, tri_n, vertex_normals, hit);
-    }
+    if (smooth_render) interpolate_vertex_normals(tri, vertex, tri_n, vertex_normals, hit);
 }
