@@ -33,7 +33,8 @@ public:
 	GlobalMaterial(Colour p_ambient, Environment* p_env, Colour p_reflect_weight, Colour p_refract_weight, float ior);
 	Colour compute_once(Ray& viewer, Hit& hit, int recurse);
 	Colour compute_per_light(Vector& viewer, Hit& hit, Vector& ldir);
-	Ray create_reflection_ray(const Ray& viewer, Hit& hit);
-	Ray create_refraction_ray(Ray& viewer, Hit& hit, const float ior);
+	Colour get_reflection_colour(const Ray& viewer, Hit& hit, const int recurse);
+	Colour get_refraction_colour(Ray& viewer, Hit& hit, const int recurse, const float n, const float cos_i, const float cos_t);
+	void fresnel(float& n, float& cos_i, float& cos_t, Hit& hit, bool& is_tir);
 };
 

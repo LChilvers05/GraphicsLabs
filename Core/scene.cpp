@@ -98,10 +98,10 @@ void Scene::raytrace(Ray ray, int recurse, Colour &colour, float &depth) {
     Light *lights = light_list;
 
     // a default colour if we hit nothing.
-    // colour.r = 0.0f;
-    // colour.g = 0.0f;
-    // colour.b = 0.0f;
-    // colour.a = 0.0f;
+    colour.r = 0.0f;
+    colour.g = 0.0f;
+    colour.b = 0.0f;
+    colour.a = 0.0f;
     depth = 0.0f;
 
     // first step, find the closest primitive
@@ -110,10 +110,9 @@ void Scene::raytrace(Ray ray, int recurse, Colour &colour, float &depth) {
     // if we found a primitive then compute the colour we should see
     if (best_hit != 0) {
         depth = best_hit->t;
-        colour = colour + best_hit->what->material->compute_once(
-                              ray, *best_hit,
-                              recurse);  // this will be the global components
-                                         // such as ambient or reflect/refract
+        // this will be the global components
+        // such as ambient or reflect/refract
+        colour = colour + best_hit->what->material->compute_once(ray, *best_hit, recurse);  
 
         // next, compute the light contribution for each light in the scene.
         Light *light = light_list;
@@ -121,7 +120,7 @@ void Scene::raytrace(Ray ray, int recurse, Colour &colour, float &depth) {
             Vector viewer;
             Vector ldir;
 
-            viewer = -ray.direction;  //-best_hit->position;
+            viewer = -ray.direction;
             viewer.normalise();
 
             bool lit;

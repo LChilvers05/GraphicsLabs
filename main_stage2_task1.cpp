@@ -55,12 +55,15 @@ Plane* make_floor() {
 void build_scene(Scene& scene) {
 	scene.add_object(make_floor());
 
+	Vector left_light_dir = Vector(1.f, -1.f, 1.f);
+	scene.add_light(make_light(left_light_dir));
+
 	GlobalMaterial* mirror = new GlobalMaterial(
 		Colour(255.f, 255.f, 255.f),
 		&scene, 
 		Colour(0.9f, 0.9f, 0.9f), 
 		Colour(0.1f, 0.1f, 0.1f), 
-		1.52f
+		1.33f
 	);
 	Sphere* mirror_sphere = make_sphere(Vertex(0.f, 7.f, 0.f), 3.0f, mirror);
 	scene.add_object(mirror_sphere);
@@ -76,15 +79,12 @@ void build_scene(Scene& scene) {
 	// scene.add_object(red_mirror_sphere);
 
 	Phong* green = new Phong(Colour(0.f, 255.f, 0.f));
-	Sphere* green_sphere = make_sphere(Vertex(-1.0f, 3.0f, -3.0f), 1.0f, green);
+	Sphere* green_sphere = make_sphere(Vertex(-3.0f, 3.0f, -3.0f), 1.0f, green);
 	scene.add_object(green_sphere);
 
 	Phong* blue = new Phong(Colour(0.f, 0.f, 255.f));
-	Sphere* blue_sphere = make_sphere(Vertex(2.f, 5.f, 8.f), 3.0f, blue);
+	Sphere* blue_sphere = make_sphere(Vertex(2.f, 7.f, 8.f), 2.0f, blue);
 	scene.add_object(blue_sphere);
-
-	Vector left_light_dir = Vector(1.f, -1.f, 1.f);
-	scene.add_light(make_light(left_light_dir));
 }
 
 // This is the entry point function to the program.
