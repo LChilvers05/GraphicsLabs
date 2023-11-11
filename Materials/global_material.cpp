@@ -40,13 +40,12 @@ GlobalMaterial::GlobalMaterial(
 // reflection and recursion computation
 Colour GlobalMaterial::compute_once(Ray& viewer, Hit& hit, int recurse) {
 	float depth; 
-	Colour result;
+	Colour result = ambient;
 
 	if (recurse == 0) { return result; }
 
 	// fresnel term
-	float n = ior;
-	float cos_i = hit.normal.dot(viewer.direction), cos_t;
+	float cos_i = hit.normal.dot(viewer.direction), cos_t, n;
 	bool is_tir = false;
 	fresnel(n, cos_i, cos_t, hit, is_tir);
 
@@ -73,6 +72,7 @@ Colour GlobalMaterial::get_reflection_colour(const Ray& viewer, Hit& hit, const 
 	rray.direction = viewer.direction - ((2.0 * hit.normal.dot(viewer.direction)) * hit.normal);
 	rray.position = hit.position + (0.0001f * rray.direction);
 
+	// recursively shoot reflection ray
 	Colour colour; float depth;
 	environment->raytrace(rray, recurse-1, colour, depth);
 	colour *= reflect_weight;
@@ -82,9 +82,10 @@ Colour GlobalMaterial::get_reflection_colour(const Ray& viewer, Hit& hit, const 
 
 Colour GlobalMaterial::get_refraction_colour(Ray& viewer, Hit& hit, const int recurse, const float n, const float cos_i, const float cos_t) {
 	Ray tray;
-	tray.direction = ((1/n) * viewer.direction) - ((cos_t - ((1/n) * cos_i)) * hit.normal);
+	tray.direction = (n * viewer.direction) - ((cos_t - (n * cos_i)) * hit.normal);
 	tray.position = hit.position + (0.0001f * tray.direction); 
 
+	// recursively shoot refraction ray
 	Colour colour; float depth;
 	environment->raytrace(tray, recurse-1, colour, depth);
 	colour *= refract_weight;
@@ -93,14 +94,17 @@ Colour GlobalMaterial::get_refraction_colour(Ray& viewer, Hit& hit, const int re
 }
 
 void GlobalMaterial::fresnel(float& n, float& cos_i, float& cos_t, Hit& hit, bool& is_tir) {
-	
 	// angle must be positive
 	cos_i = abs(cos_i);
+	if (cos_i > 1) cos_i = 1.f;
+
+	float n1 = 1.f, n2 = ior;
 	// flip index of refraction if exiting
-	if (!hit.entering) n = 1/n;
+	if (!hit.entering) swap(n1, n2);
+	n = n1/n2;
 
 	float kr;
-	float tir = 1.f - (1/(n*n)) * (1.f - (cos_i * cos_i));
+	float tir = 1.f - (n * n * (1.f - (cos_i * cos_i)));
 
 	if (tir < 0) {
 		// total internal reflection
@@ -111,8 +115,8 @@ void GlobalMaterial::fresnel(float& n, float& cos_i, float& cos_t, Hit& hit, boo
 		cos_t = sqrtf(tir);
 		
 		// Fresnel equations
-		float r_par = (ior*cos_i - cos_t) / (ior*cos_i + cos_t);
-		float r_per = (cos_i - ior*cos_t) / (cos_i + ior*cos_t);
+		float r_par = (n2*cos_i - n1*cos_t) / (n2*cos_i + n1*cos_t);
+		float r_per = (n1*cos_i - n2*cos_t) / (n1*cos_i + n2*cos_t);
 		kr = (r_par*r_par + r_per*r_per)/2.f;
 	}
 
