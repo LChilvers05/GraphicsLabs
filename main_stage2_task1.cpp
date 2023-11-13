@@ -46,7 +46,7 @@ PolyMesh* make_teapot() {
 
 Light* make_light(Vector& ldir) {
 	ldir.normalise();
-	Colour lColour = Colour(5.0f, 5.0f, 5.0f);
+	Colour lColour = Colour(255.0f, 255.0f, 255.0f);
 	Light* light = new DirectionalLight(ldir, lColour);
 	return light;
 }
@@ -68,9 +68,9 @@ void build_scene(Scene& scene) {
 
 	Plane* floor = make_floor();
 	GlobalMaterial* mirror = new GlobalMaterial(
-		Colour(1.f, 1.f, 1.f),
+		Colour(100.f, 100.f, 100.f),
 		&scene, 
-		Colour(0.6f, 0.6f, 0.6f), 
+		Colour(0.3f, 0.3f, 0.3f), 
 		Colour(0.f, 0.f, 0.f), 
 		0.f,
 		false
@@ -79,10 +79,10 @@ void build_scene(Scene& scene) {
 	scene.add_object(floor);
 
 	GlobalMaterial* glass = new GlobalMaterial(
-		Colour(1.f, 1.f, 1.f),
+		Colour(100.f, 100.f, 100.f),
 		&scene, 
-		Colour(0.3f, 0.3f, 0.3f), 
-		Colour(0.7f, 0.7f, 0.7f), 
+		Colour(0.2f, 0.2f, 0.2f), 
+		Colour(0.5f, 0.5f, 0.5f), 
 		1.52f,
 		false
 	);
@@ -92,9 +92,9 @@ void build_scene(Scene& scene) {
 	scene.add_object(teapot);
 
 	GlobalMaterial* red_mirror = new GlobalMaterial(
-		Colour(1.f, 0.f, 0.f),
+		Colour(100.f, 0.f, 0.f),
 		&scene, 
-		Colour(0.9f, 0.9f, 0.9f), 
+		Colour(0.4f, 0.4f, 0.4f), 
 		Colour(0.1f, 0.1f, 0.1f), 
 		1.52f,
 		false
@@ -102,24 +102,17 @@ void build_scene(Scene& scene) {
 	Sphere* red_sphere = make_sphere(Vertex(-8.f, 5.f, -10.f), 2.0f, red_mirror);
 	scene.add_object(red_sphere);
 
-	GlobalMaterial* blue_mirror = new GlobalMaterial(
-		Colour(0.f, 0.f, 1.f),
-		&scene, 
-		Colour(0.5f, 0.5f, 0.5f), 
-		Colour(0.5f, 0.5f, 0.5f), 
-		1.52f,
-		false
-	);
-	Sphere* blue_sphere = make_sphere(Vertex(14.f, 10.f, 2.f), 2.0f, blue_mirror);
+	Phong* blue = new Phong(Colour(0.f, 0.f, 255.f));
+	Sphere* blue_sphere = make_sphere(Vertex(14.f, 10.f, 2.f), 2.0f, blue);
 	scene.add_object(blue_sphere);
 
 	GlobalMaterial* green_glass = new GlobalMaterial(
-		Colour(0.f, 1.f, 0.f),
+		Colour(0.f, 100.f, 0.f),
 		&scene, 
 		Colour(0.1f, 0.1f, 0.1f), 
-		Colour(0.9f, 0.9f, 0.9f), 
+		Colour(0.5f, 0.5f, 0.5f), 
 		1.52f,
-		true
+		false
 	);
 	Sphere* green_sphere = make_sphere(Vertex(0.f, 13.f, -9.f), 3.0f, green_glass);
 	scene.add_object(green_sphere);
@@ -136,8 +129,8 @@ int main(int argc, char *argv[]) {
 	// Setup the scene
 	build_scene(scene);
 
-	Vertex p_position = Vertex(0.0f, 10.0f, -26.0f);
-	Vector p_lookat = Vector(0.0f, -0.1f, 1.0f);
+	Vertex p_position = Vertex(0.01f, 10.0f, -26.0f);
+	Vector p_lookat = Vector(-0.01f, -0.1f, 1.0f);
 	Vector p_up = Vector(0.0f, 1.0f, 0.0f);
 	Camera *camera = new FullCamera(0.6f, p_position, p_lookat, p_up);
 	
