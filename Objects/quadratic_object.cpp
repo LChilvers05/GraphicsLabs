@@ -42,25 +42,78 @@ Hit* Quadratic::intersection(Ray ray) {
 	// no intersection and ignore if tangent
 	if (disc < 0 || a_q == 0) return 0;
 
+	// quadratic get both values for t
 	const float t0 = (-b_q - sqrtf(disc)) / (2*a_q);
 	const float t1 = (-b_q + sqrtf(disc)) / (2*a_q);
 
-	//TODO: think about how we will do entering/exiting for refraction
-	// logic if ts are infront or behind start of ray
+	// create hits and check if visible to ray
+	bool hit0_isVisible;
+	Hit* hit0 = make_hit(ray, t0, hit0_isVisible);
 
-	Vertex hit_pos0 = Vertex(
-		p_x + (t0*d_x),
-		p_y + (t0*d_y),
-		p_z + (t0*d_z)
-	);
+	bool hit1_isVisible;
+	Hit* hit1 = make_hit(ray, t1, hit1_isVisible);
 
-	Vertex hit_pos1 = Vertex(
-		p_x + (t1*d_x),
-		p_y + (t1*d_y),
-		p_z + (t1*d_z)
+	Hit* hits = 0;
+	if (hit0_isVisible && hit1_isVisible) {
+
+		if (hit0->t < hit1->t) {
+			hit0->entering = true;
+			hit0->next = hit1;
+			hit1->entering = false;
+			hits = hit0;
+
+		} else {
+			hit1->entering = true;
+			hit1->next = hit0;
+			hit0->entering = false;
+			hits = hit1;
+		}
+
+	} else if (hit0_isVisible) {
+		delete hit1;
+		hit0->entering = false;
+		hits = hit0;
+
+	} else if (hit1_isVisible) {
+		delete hit0;
+		hit1->entering = false;
+		hits = hit1;
+
+	} else {
+		delete hit0;
+		delete hit1;
+	} 
+
+	return hits;
+}
+
+Hit* Quadratic::make_hit(const Ray ray, const float t, bool& isVisible) {
+	const float p_x = ray.position.x, p_y = ray.position.y, p_z = ray.position.z;
+	const float d_x = ray.direction.x, d_y = ray.direction.y, d_z = ray.direction.z;
+
+	Hit* hit = new Hit();
+	hit->what = this;
+	hit->next = 0;
+	hit->position = Vertex(
+		p_x + (t*d_x), 
+		p_y + (t*d_y), 
+		p_z + (t*d_z)
 	);
-	
-	return 0; 
+	Vector direction = hit->position - ray.position; //TODO: check goes in right direction - might need to negate
+	hit->t = direction.length();
+	direction.normalise();
+	// check if hit is before the ray starting position
+	isVisible = direction.isEqual(ray.direction);
+
+	// normal
+	hit->normal = Vector(
+		2*(a*hit->position.x + b*hit->position.y + c*hit->position.z + d),
+		2*(b*hit->position.x + e*hit->position.y + f*hit->position.z + g),
+		2*(c*hit->position.x + f*hit->position.y + h*hit->position.z + i)
+	);
+	hit->normal.normalise();
+
+	return hit;
 }
 
 void Quadratic::apply_transform(Transform& trans) {}

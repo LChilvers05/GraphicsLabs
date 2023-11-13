@@ -179,6 +179,14 @@ public:
 		this->z = v->z;
 		return *this;
 	}
+
+	bool isEqual(const Vector& other) {
+		return (
+			this->x == other.x &&
+			this->y == other.y &&
+			this->z == other.z
+		);
+	}
 };
 
 #endif

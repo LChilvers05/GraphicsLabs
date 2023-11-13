@@ -31,4 +31,6 @@ class Quadratic : public Object {
 	
 	private:
 		float a, b, c, d, e, f, g, h, i ,j;
+
+		Hit* make_hit(const Ray ray, const float t, bool& isVisible);
 };
