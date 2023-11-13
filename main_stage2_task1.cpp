@@ -46,7 +46,7 @@ PolyMesh* make_teapot() {
 
 Light* make_light(Vector& ldir) {
 	ldir.normalise();
-	Colour lColour = Colour(255.0f, 255.0f, 255.0f);
+	Colour lColour = Colour(5.0f, 5.0f, 5.0f);
 	Light* light = new DirectionalLight(ldir, lColour);
 	return light;
 }
@@ -68,7 +68,7 @@ void build_scene(Scene& scene) {
 
 	Plane* floor = make_floor();
 	GlobalMaterial* mirror = new GlobalMaterial(
-		Colour(255.f, 255.f, 255.f),
+		Colour(1.f, 1.f, 1.f),
 		&scene, 
 		Colour(0.6f, 0.6f, 0.6f), 
 		Colour(0.f, 0.f, 0.f), 
@@ -79,7 +79,7 @@ void build_scene(Scene& scene) {
 	scene.add_object(floor);
 
 	GlobalMaterial* glass = new GlobalMaterial(
-		Colour(255.f, 255.f, 255.f),
+		Colour(1.f, 1.f, 1.f),
 		&scene, 
 		Colour(0.3f, 0.3f, 0.3f), 
 		Colour(0.7f, 0.7f, 0.7f), 
@@ -92,7 +92,7 @@ void build_scene(Scene& scene) {
 	scene.add_object(teapot);
 
 	GlobalMaterial* red_mirror = new GlobalMaterial(
-		Colour(255.f, 0.f, 0.f),
+		Colour(1.f, 0.f, 0.f),
 		&scene, 
 		Colour(0.9f, 0.9f, 0.9f), 
 		Colour(0.1f, 0.1f, 0.1f), 
@@ -103,7 +103,7 @@ void build_scene(Scene& scene) {
 	scene.add_object(red_sphere);
 
 	GlobalMaterial* blue_mirror = new GlobalMaterial(
-		Colour(0.f, 0.f, 255.f),
+		Colour(0.f, 0.f, 1.f),
 		&scene, 
 		Colour(0.5f, 0.5f, 0.5f), 
 		Colour(0.5f, 0.5f, 0.5f), 
@@ -114,7 +114,7 @@ void build_scene(Scene& scene) {
 	scene.add_object(blue_sphere);
 
 	GlobalMaterial* green_glass = new GlobalMaterial(
-		Colour(0.f, 255.f, 0.f),
+		Colour(0.f, 1.f, 0.f),
 		&scene, 
 		Colour(0.1f, 0.1f, 0.1f), 
 		Colour(0.9f, 0.9f, 0.9f), 
@@ -145,7 +145,7 @@ int main(int argc, char *argv[]) {
 	camera->render(scene,*fb);
 	
 	// Output the framebuffer colour and depth as two images
-	fb->writeRGBFile((char *)"reflection_refraction.ppm");
+	fb->writeRGBFile((char *)"reflection_refraction2.ppm");
 	// fb->writeDepthFile((char *)"depth.ppm");
 	
 	cerr << "\nDone.\n" << flush;
