@@ -28,7 +28,7 @@
 using namespace std;
 
 void build_scene(Scene& scene) {
-    Quadratic* surface = new Quadratic(2, 1, 0, 0, 0, 2, 0, 0, 0, -1);
+    Quadratic* surface = new Quadratic(1/4, 0, 0, 0, 1/4, 0, 0, 0, -1/2, 0);
     FalseColour* mat = new FalseColour();
     surface->set_material(mat);
 
@@ -46,8 +46,8 @@ int main(int argc, char *argv[]) {
 	// Setup the scene
 	build_scene(scene);
 
-	Vertex p_position = Vertex(0.01f, 0.0f, -20.0f);
-	Vector p_lookat = Vector(0.f, 0.f, 1.0f);
+	Vertex p_position = Vertex(0.f, 10.0f, 0.0f);
+	Vector p_lookat = Vector(1.f, 0.f, 0.0f);
 	Vector p_up = Vector(0.0f, 1.0f, 0.0f);
 	Camera *camera = new FullCamera(0.6f, p_position, p_lookat, p_up);
 	

@@ -34,7 +34,7 @@ Hit* Quadratic::intersection(Ray ray) {
 	const float d_x = ray.direction.x, d_y = ray.direction.y, d_z = ray.direction.z;
 
 	const float a_q = (a * d_x*d_x) + (2*b * d_x * d_y) + (2*c * d_x * d_z) + (e * d_y*d_y) + (2*f * d_y * d_z) + (g * d_z*d_z);
-	const float b_q = 2*((a * p_x * d_x) + b*(p_x*d_y + d_x*p_y) + c*(p_x*d_z + d_x*d_z) + (d * d_x) + (e * p_y * d_y) + f*(p_y*d_z + d_y*p_z) + (g * d_y) + (h * p_z * d_z) + (i * d_z));
+	const float b_q = 2*((a * p_x * d_x) + b*(p_x*d_y + d_x*p_y) + c*(p_x*d_z + d_x*p_z) + (d * d_x) + (e * p_y * d_y) + f*(p_y*d_z + d_y*p_z) + (g * d_y) + (h * p_z * d_z) + (i * d_z));
 	const float c_q = (a * p_x*p_x) + (2*b * p_x * p_y) + (2*c * p_x * p_z) + (2*d * p_x) + (e * p_y*p_y) + (2*f * p_y * p_z) + (2*g * p_y) + (h * p_z*p_z) + (2*i * p_z) + j;
 
 	const float disc = (b_q*b_q) - (4 * a_q * c_q);
@@ -99,11 +99,11 @@ Hit* Quadratic::make_hit(const Ray ray, const float t, bool& isVisible) {
 		p_y + (t*d_y), 
 		p_z + (t*d_z)
 	);
-	Vector direction = hit->position - ray.position; //TODO: check goes in right direction - might need to negate
+	Vector direction = hit->position - ray.position;
 	hit->t = direction.length();
 	direction.normalise();
 	// check if hit is before the ray starting position
-	isVisible = direction.isEqual(ray.direction);
+	isVisible = (direction.dot(ray.direction) > 0);
 
 	// normal
 	hit->normal = Vector(
@@ -112,6 +112,7 @@ Hit* Quadratic::make_hit(const Ray ray, const float t, bool& isVisible) {
 		2*(c*hit->position.x + f*hit->position.y + h*hit->position.z + i)
 	);
 	hit->normal.normalise();
+	if (hit->normal.dot(ray.direction) > 0) hit->normal.negate();
 
 	return hit;
 }
