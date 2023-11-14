@@ -30,31 +30,32 @@ Quadratic::Quadratic(float a, float b, float c, float d, float e, float f, float
 }
 
 Hit* Quadratic::intersection(Ray ray) { 
+	ray.direction.normalise();
 	const float p_x = ray.position.x, p_y = ray.position.y, p_z = ray.position.z;
 	const float d_x = ray.direction.x, d_y = ray.direction.y, d_z = ray.direction.z;
 
-	const float a_q = (a * d_x*d_x) + (2*b * d_x * d_y) + (2*c * d_x * d_z) + (e * d_y*d_y) + (2*f * d_y * d_z) + (g * d_z*d_z);
+	const float a_q = (a * d_x*d_x) + (2*b * d_x * d_y) + (2*c * d_x * d_z) + (e * d_y*d_y) + (2*f * d_y * d_z) + (h * d_z*d_z);
 	const float b_q = 2*((a * p_x * d_x) + b*(p_x*d_y + d_x*p_y) + c*(p_x*d_z + d_x*p_z) + (d * d_x) + (e * p_y * d_y) + f*(p_y*d_z + d_y*p_z) + (g * d_y) + (h * p_z * d_z) + (i * d_z));
 	const float c_q = (a * p_x*p_x) + (2*b * p_x * p_y) + (2*c * p_x * p_z) + (2*d * p_x) + (e * p_y*p_y) + (2*f * p_y * p_z) + (2*g * p_y) + (h * p_z*p_z) + (2*i * p_z) + j;
 
-	const float disc = (b_q*b_q) - (4 * a_q * c_q);
+	const float disc = (b_q*b_q) - (4.f * a_q * c_q);
 
 	// no intersection and ignore if tangent
-	if (disc < 0 || a_q == 0) return 0;
+	if (disc < 0 || a_q == 0.f) return 0;
 
 	// quadratic get both values for t
 	const float t0 = (-b_q - sqrtf(disc)) / (2*a_q);
 	const float t1 = (-b_q + sqrtf(disc)) / (2*a_q);
 
 	// create hits and check if visible to ray
-	bool hit0_isVisible;
-	Hit* hit0 = make_hit(ray, t0, hit0_isVisible);
+	bool hit0_is_visible;
+	Hit* hit0 = make_hit(ray, t0, hit0_is_visible);
 
-	bool hit1_isVisible;
-	Hit* hit1 = make_hit(ray, t1, hit1_isVisible);
+	bool hit1_is_visible;
+	Hit* hit1 = make_hit(ray, t1, hit1_is_visible);
 
 	Hit* hits = 0;
-	if (hit0_isVisible && hit1_isVisible) {
+	if (hit0_is_visible && hit1_is_visible) {
 
 		if (hit0->t < hit1->t) {
 			hit0->entering = true;
@@ -69,12 +70,12 @@ Hit* Quadratic::intersection(Ray ray) {
 			hits = hit1;
 		}
 
-	} else if (hit0_isVisible) {
+	} else if (hit0_is_visible) {
 		delete hit1;
 		hit0->entering = false;
 		hits = hit0;
 
-	} else if (hit1_isVisible) {
+	} else if (hit1_is_visible) {
 		delete hit0;
 		hit1->entering = false;
 		hits = hit1;
@@ -87,7 +88,7 @@ Hit* Quadratic::intersection(Ray ray) {
 	return hits;
 }
 
-Hit* Quadratic::make_hit(const Ray ray, const float t, bool& isVisible) {
+Hit* Quadratic::make_hit(const Ray ray, const float t, bool& is_visible) {
 	const float p_x = ray.position.x, p_y = ray.position.y, p_z = ray.position.z;
 	const float d_x = ray.direction.x, d_y = ray.direction.y, d_z = ray.direction.z;
 
@@ -103,7 +104,7 @@ Hit* Quadratic::make_hit(const Ray ray, const float t, bool& isVisible) {
 	hit->t = direction.length();
 	direction.normalise();
 	// check if hit is before the ray starting position
-	isVisible = (direction.dot(ray.direction) > 0);
+	is_visible = (direction.dot(ray.direction) > 0);
 
 	// normal
 	hit->normal = Vector(

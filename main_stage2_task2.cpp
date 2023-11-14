@@ -28,11 +28,32 @@
 using namespace std;
 
 void build_scene(Scene& scene) {
-    Quadratic* surface = new Quadratic(1/4, 0, 0, 0, 1/4, 0, 0, 0, -1/2, 0);
     FalseColour* mat = new FalseColour();
-    surface->set_material(mat);
+    // ax2 + 2bxy + 2cxz + 2dx + ey2 + 2fyz + 2gy + hz2 + 2iz + j = 0
+    // Quadratic* surface = new Quadratic(1/4, 0, 0, 0, 1/4, 0, 0, 0, -1/2, 0);
+    // Quadratic* surface = new Quadratic(1, 0, 0, 0, 1/4, 0, 0, 0, -1/10, 0);
+    Quadratic* surface = new Quadratic(2, 1, 0, 0, 0, 2, 0, 1, 0, -1);
 
+    // Quadratic* surface = new Quadratic(1, 0, 0, 1, 1, 0, 1, 1, 5, 10);
+    GlobalMaterial* glass = new GlobalMaterial(
+		Colour(100.f, 100.f, 100.f),
+		&scene, 
+		Colour(0.2f, 0.2f, 0.2f), 
+		Colour(0.5f, 0.5f, 0.5f), 
+		1.52f,
+		false
+	);
+    surface->set_material(mat);
     scene.add_object(surface);
+    
+    // TODO: does not work for some equations
+    // Quadratic* cone = new Quadratic(1, 0, 0, 0, 1, 0, 0, 0, -1/2, 0);
+    // cone->set_material(mat);
+    // scene.add_object(cone);
+
+    Quadratic* sphere = new Quadratic(1, 0, 0, 1, 1, 0, 1, 1, 5, -1);
+    sphere->set_material(mat);
+    scene.add_object(sphere);
 }
 
 // This is the entry point function to the program.
@@ -46,8 +67,8 @@ int main(int argc, char *argv[]) {
 	// Setup the scene
 	build_scene(scene);
 
-	Vertex p_position = Vertex(0.f, 10.0f, 0.0f);
-	Vector p_lookat = Vector(1.f, 0.f, 0.0f);
+	Vertex p_position = Vertex(0.f, 20.0f, 20.f);
+	Vector p_lookat = Vector(0.f, -1.f, -1.f);
 	Vector p_up = Vector(0.0f, 1.0f, 0.0f);
 	Camera *camera = new FullCamera(0.6f, p_position, p_lookat, p_up);
 	
