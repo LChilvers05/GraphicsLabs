@@ -41,7 +41,7 @@ Hit* Quadratic::intersection(Ray ray) {
 	const float disc = (b_q*b_q) - (4.f * a_q * c_q);
 
 	// no intersection and ignore if tangent
-	if (disc < 0 || a_q == 0.f) return 0;
+	if (disc < 0.f || a_q == 0.f) return 0;
 
 	// quadratic get both values for t
 	const float t0 = (-b_q - sqrtf(disc)) / (2*a_q);
@@ -88,18 +88,11 @@ Hit* Quadratic::intersection(Ray ray) {
 	return hits;
 }
 
-Hit* Quadratic::make_hit(const Ray ray, const float t, bool& is_visible) {
-	const float p_x = ray.position.x, p_y = ray.position.y, p_z = ray.position.z;
-	const float d_x = ray.direction.x, d_y = ray.direction.y, d_z = ray.direction.z;
-
+Hit* Quadratic::make_hit(Ray ray, const float t, bool& is_visible) {
 	Hit* hit = new Hit();
 	hit->what = this;
 	hit->next = 0;
-	hit->position = Vertex(
-		p_x + (t*d_x), 
-		p_y + (t*d_y), 
-		p_z + (t*d_z)
-	);
+	hit->position = ray.position + (t * ray.direction);
 	Vector direction = hit->position - ray.position;
 	hit->t = direction.length();
 	direction.normalise();
@@ -118,4 +111,6 @@ Hit* Quadratic::make_hit(const Ray ray, const float t, bool& is_visible) {
 	return hit;
 }
 
-void Quadratic::apply_transform(Transform& trans) {}
+void Quadratic::apply_transform(Transform& trans) {
+	
+}

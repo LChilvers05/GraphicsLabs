@@ -30,30 +30,27 @@ using namespace std;
 void build_scene(Scene& scene) {
     FalseColour* mat = new FalseColour();
     // ax2 + 2bxy + 2cxz + 2dx + ey2 + 2fyz + 2gy + hz2 + 2iz + j = 0
-    // Quadratic* surface = new Quadratic(1/4, 0, 0, 0, 1/4, 0, 0, 0, -1/2, 0);
-    // Quadratic* surface = new Quadratic(1, 0, 0, 0, 1/4, 0, 0, 0, -1/10, 0);
-    Quadratic* surface = new Quadratic(2, 1, 0, 0, 0, 2, 0, 1, 0, -1);
 
-    // Quadratic* surface = new Quadratic(1, 0, 0, 1, 1, 0, 1, 1, 5, 10);
-    GlobalMaterial* glass = new GlobalMaterial(
-		Colour(100.f, 100.f, 100.f),
-		&scene, 
-		Colour(0.2f, 0.2f, 0.2f), 
-		Colour(0.5f, 0.5f, 0.5f), 
-		1.52f,
-		false
-	);
+	// 1) hyperbolic paraboloid = z = x2/a2 - y2/b2
+    // Quadratic* surface = new Quadratic(0.25f, 0, 0, 0, -0.25f, 0, 0, 0, -0.5f, 0);
+
+	// 2) elliptic paraboloid = z = x2/a2 + y2/b2
+    // Quadratic* surface = new Quadratic(0.25f, 0, 0, 0, 0.25f, 0, 0, 0, -0.5f, 0);
+
+	// 3) elliptic cone = 0 = x2/a2 + y2/b2 - z2/c2
+	// Quadratic* surface = new Quadratic(0.25f, 0, 0, 0, 0.25f, 0, 0, -0.25f, 0, 0);
+
+	// 4) hyperboloid of two sheets 1 = -x2/a2 - y2/b2 + z2/c2
+	// Quadratic* surface = new Quadratic(-0.25f, 0, 0, 0, -0.25f, 0, 0, 0.25f, 0, -1);
+
+	// 5) hyperboloid of one sheet 1 = x2/a2 + y2/b2 - z2/c2
+	// Quadratic* surface = new Quadratic(0.25f, 0, 0, 0, 0.25f, 0, 0, -0.25f, 0, -1);
+
+	// 6) ellipsoid = 1 = x2/a2 + y2/b2 - z2/c2
+	Quadratic* surface = new Quadratic(0.25f, 0, 0, 0, 0.25f, 0, 0, 0.25f, 0, -1);
+
     surface->set_material(mat);
     scene.add_object(surface);
-    
-    // TODO: does not work for some equations
-    // Quadratic* cone = new Quadratic(1, 0, 0, 0, 1, 0, 0, 0, -1/2, 0);
-    // cone->set_material(mat);
-    // scene.add_object(cone);
-
-    Quadratic* sphere = new Quadratic(1, 0, 0, 1, 1, 0, 1, 1, 5, -1);
-    sphere->set_material(mat);
-    scene.add_object(sphere);
 }
 
 // This is the entry point function to the program.
@@ -67,16 +64,17 @@ int main(int argc, char *argv[]) {
 	// Setup the scene
 	build_scene(scene);
 
-	Vertex p_position = Vertex(0.f, 20.0f, 20.f);
-	Vector p_lookat = Vector(0.f, -1.f, -1.f);
-	Vector p_up = Vector(0.0f, 1.0f, 0.0f);
+	// look down y-axis
+	Vertex p_position = Vertex(0.f, 10.f, 0.f);
+	Vector p_lookat = Vector(0.f, -1.f, 0.f);
+	Vector p_up = Vector(0.f, 0.f, 1.f);
 	Camera *camera = new FullCamera(0.6f, p_position, p_lookat, p_up);
 	
 	// Camera generates rays for each pixel in the framebuffer and records colour + depth.
 	camera->render(scene,*fb);
 	
 	// Output the framebuffer colour and depth as two images
-	fb->writeRGBFile((char *)"quadratic_surface.ppm");
+	fb->writeRGBFile((char *)"quad_translation.ppm");
 	// fb->writeDepthFile((char *)"depth.ppm");
 	
 	cerr << "\nDone.\n" << flush;
