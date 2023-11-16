@@ -112,5 +112,25 @@ Hit* Quadratic::make_hit(Ray ray, const float t, bool& is_visible) {
 }
 
 void Quadratic::apply_transform(Transform& trans) {
-	
+	Transform trans_pose = trans.transpose();
+	Transform q = Transform(
+		a, b, c, d,
+		b, e, f, g,
+		c, f, h, i,
+		d, g, i , j
+	);
+
+	Transform rhs = q * trans;
+	Transform new_q = trans_pose * rhs;
+
+	a = new_q.matrix[0][0];
+	b = new_q.matrix[0][1];
+	c = new_q.matrix[0][2];
+	d = new_q.matrix[0][3];
+	e = new_q.matrix[1][1];
+	f = new_q.matrix[1][2];
+	g = new_q.matrix[1][3];
+	h = new_q.matrix[2][2];
+	i = new_q.matrix[2][3];
+	j = new_q.matrix[3][3];
 }

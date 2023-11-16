@@ -38,7 +38,7 @@ void build_scene(Scene& scene) {
     // Quadratic* surface = new Quadratic(0.25f, 0, 0, 0, 0.25f, 0, 0, 0, -0.5f, 0);
 
 	// 3) elliptic cone = 0 = x2/a2 + y2/b2 - z2/c2
-	// Quadratic* surface = new Quadratic(0.25f, 0, 0, 0, 0.25f, 0, 0, -0.25f, 0, 0);
+	Quadratic* surface = new Quadratic(0.25f, 0, 0, 0, 0.25f, 0, 0, -0.25f, 0, 0);
 
 	// 4) hyperboloid of two sheets 1 = -x2/a2 - y2/b2 + z2/c2
 	// Quadratic* surface = new Quadratic(-0.25f, 0, 0, 0, -0.25f, 0, 0, 0.25f, 0, -1);
@@ -47,7 +47,16 @@ void build_scene(Scene& scene) {
 	// Quadratic* surface = new Quadratic(0.25f, 0, 0, 0, 0.25f, 0, 0, -0.25f, 0, -1);
 
 	// 6) ellipsoid = 1 = x2/a2 + y2/b2 - z2/c2
-	Quadratic* surface = new Quadratic(0.25f, 0, 0, 0, 0.25f, 0, 0, 0.25f, 0, -1);
+	// Quadratic* surface = new Quadratic(0.25f, 0, 0, 0, 0.25f, 0, 0, 0.25f, 0, -1);
+
+	// rotate around z axis 90deg
+	Transform y_rot = Transform(
+		0, 0, 1, 0,
+		0, 1, 0, 0,
+		-1, 0, 0, 0,
+		0, 0, 0, 1
+	);
+	surface->apply_transform(y_rot);
 
     surface->set_material(mat);
     scene.add_object(surface);
