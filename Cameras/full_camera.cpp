@@ -43,10 +43,6 @@ void FullCamera::make_orthonormal_bases(Vertex& eye, Vertex& look, Vector& up) {
     w.cross(u, this->v);
 }
 
-void FullCamera::get_ray_offset(int p_x, int p_y, float p_ox, float p_oy, Ray& p_ray) {
-
-}
-
 void FullCamera::get_ray_pixel(int p_x, int p_y, Ray& ray) {    
     //each ray begins at the eye point
     ray.position = position;

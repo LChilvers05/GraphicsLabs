@@ -25,7 +25,7 @@
 
 #include "camera.h"
 
-class FullCamera: public Camera{
+class FullCamera: public Camera {
 public:
   int width;
   int height;
