@@ -13,14 +13,15 @@ public:
   Vertex position;
   Vector lookat;
   Vector up;
+  Vector right;
 
   DepthOfFieldCamera();
 
   DepthOfFieldCamera(float p_f, float p_focal_length, float p_aperature, Vertex& p_position, Vector& p_lookat, Vector &p_up);
 
-  void get_ray_offset(int p_x, int p_y, float p_ox, float p_oy, Ray &p_ray);
+  Ray get_primary_ray(int p_x, int p_y);
 
-  void get_ray_pixel(int p_x, int p_y, Ray &ray);
+  Ray get_secondary_ray(Ray& primary_ray);
 
   void render(Environment& env, FrameBuffer& fb);
 

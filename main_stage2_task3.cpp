@@ -34,11 +34,12 @@ Light* make_light(Vector& ldir) {
 }
 
 void build_scene(Scene& scene) {
-    Vector left_light_dir = Vector(0.f, 0.f, 1.f);
+    Vector left_light_dir = Vector(1.f, -1.f, 1.f);
 	scene.add_light(make_light(left_light_dir));
 
     Phong* blue = new Phong(Colour(0.f, 0.f, 255.f));
     Phong* red = new Phong(Colour(255.f, 0.f, 0.f));
+	Phong* green = new Phong(Colour(0.f, 255.f, 0.f));
 
     Sphere* blue_sphere = new Sphere(Vertex(0.f, 0.f, 0.f), 5.f);
     blue_sphere->set_material(blue);
@@ -47,6 +48,10 @@ void build_scene(Scene& scene) {
     Sphere* red_sphere = new Sphere(Vertex(10.f, 0.f, 5.f), 5.f);
     red_sphere->set_material(red);
     scene.add_object(red_sphere);
+
+	Sphere* green_sphere = new Sphere(Vertex(-10.f, 2.f, 2.f), 3.f);
+    green_sphere->set_material(green);
+    scene.add_object(green_sphere);
 }
 
 // This is the entry point function to the program.
