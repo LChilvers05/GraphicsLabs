@@ -39,7 +39,6 @@ GlobalMaterial::GlobalMaterial(
 
 // reflection and recursion computation
 Colour GlobalMaterial::compute_once(Ray& viewer, Hit& hit, int recurse) {
-	float depth; 
 	Colour result = ambient;
 
 	if (recurse == 0) { return result; }
