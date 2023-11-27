@@ -51,7 +51,7 @@ Sphere* make_sphere(const Vertex c, const float r) {
 }
 
 PolyMesh* make_teapot() {
-	PolyMesh* teapot = new PolyMesh((char *)"teapot-low.obj", false);
+	PolyMesh* teapot = new PolyMesh((char *)"teapot-low.obj");
 	teapot->smooth_render = true;
 	Transform * transform = new Transform(
 		1.0f, 0.0f, 0.0f, 0.0f,

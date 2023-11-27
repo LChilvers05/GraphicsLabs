@@ -31,13 +31,13 @@
 
 using namespace std;
 
-PolyMesh::PolyMesh(char* file, bool smooth) {
+PolyMesh::PolyMesh(char* file) {
     smooth_render = false;
-    read_file(file, smooth);
+    read_file(file);
     next = 0;
 }
 
-void PolyMesh::read_file(char* file, bool smooth) {
+void PolyMesh::read_file(char* file) {
     // read file into stream
     fstream file_stream;
     file_stream.open(file, ios::in);

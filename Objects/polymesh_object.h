@@ -40,12 +40,12 @@ public:
 	Hit *intersection(Ray ray);
 	void apply_transform(Transform& trans);
 
-    PolyMesh(char *file, bool smooth);
+    PolyMesh(char *file);
 	~PolyMesh(){}
 
 private:	
 
-	void read_file(char* file, bool smooth);
+	void read_file(char* file);
 	vector<string> split(string str, char ch);
 	void process(vector<string> line_components);
 	void process_vertex(vector<string> raw_vertex);
