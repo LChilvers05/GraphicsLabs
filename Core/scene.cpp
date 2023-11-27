@@ -23,6 +23,26 @@ Scene::Scene() {
     light_list = 0;
 }
 
+// TODO: Pass 1: Constructing the Photon Maps
+void Scene::construct_photon_map(int photon_count) {
+    Light *light = light_list;
+    while (light != (Light *)0) {
+        // cast to PointLight
+        PointLight* point_light = dynamic_cast<PointLight*>(light);
+        if (point_light == nullptr) continue;
+        // shoot photons into scene
+        for (int i = 0; i < photon_count; i++) {
+
+            
+
+
+
+        }
+
+        light = light->next;
+    }
+}
+
 bool Scene::shadowtrace(Ray ray, float limit) {
     Object *objects = this->object_list;
 
@@ -67,30 +87,6 @@ Hit *Scene::trace(Ray ray) {
     }
 
     return best_hit;
-}
-
-Hit *Scene::select_first(Hit *list) {
-    Hit *result = 0;
-
-    while (list != 0) {
-        if (list->t >= 0.0f) {
-            result = list;
-            list = list->next;
-            break;
-        }
-
-        Hit *temp = list;
-        list = list->next;
-        delete temp;
-    }
-
-    while (list != 0) {
-        Hit *temp = list;
-        list = list->next;
-        delete temp;
-    }
-
-    return result;
 }
 
 void Scene::raytrace(Ray ray, int recurse, Colour &colour, float &depth) {
@@ -162,6 +158,30 @@ void Scene::raytrace(Ray ray, int recurse, Colour &colour, float &depth) {
         colour.b = 0.0f;
         colour.a = 1.0f;
     }
+}
+
+Hit *Scene::select_first(Hit *list) {
+    Hit *result = 0;
+
+    while (list != 0) {
+        if (list->t >= 0.0f) {
+            result = list;
+            list = list->next;
+            break;
+        }
+
+        Hit *temp = list;
+        list = list->next;
+        delete temp;
+    }
+
+    while (list != 0) {
+        Hit *temp = list;
+        list = list->next;
+        delete temp;
+    }
+
+    return result;
 }
 
 void Scene::add_object(Object *obj) {

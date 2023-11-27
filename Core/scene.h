@@ -22,6 +22,7 @@
 #include "ray.h"
 #include "object.h"
 #include "light.h"
+#include "point_light.h"
 #include "hit.h"
 #include "environment.h"
 
@@ -36,6 +37,9 @@ public:
   Light *light_list;
 
   Scene();
+
+  // Emit photons from light sources and construct photo map (pass 1)
+  void construct_photon_map(int photon_count);
 
   // Filter the list of returned hits to the closest +ve
   Hit* select_first(Hit* list);
