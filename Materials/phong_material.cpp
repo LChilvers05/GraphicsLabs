@@ -36,12 +36,15 @@ Colour Phong::compute_per_light(Vector& viewer, Hit& hit, Vector& ldir) {
 
 float Phong::get_diffuse(Hit& hit, const Vector& ldir) {
 	Vector towards_light = -1*ldir;
-	float k_d = 1.0f; //diffuse coefficient
 	return k_d*(max(0.f, hit.normal.dot(towards_light)));
 }
 
 float Phong::get_specular(const Vector& viewer, Hit& hit, Vector& ldir) {
-	float k_s = 0.2f; //specular coefficient
 	Vector r = ldir - ((2.0f * (ldir.dot(hit.normal))) * hit.normal);
 	return k_s * pow(max(0.f, r.dot(viewer)), 50);
+}
+
+void Phong::get_diffuse_specular_probs(float& p_d, float& p_s, Hit& hit, Ray ray) {
+	p_d = k_d;
+	p_s = k_s;
 }

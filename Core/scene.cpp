@@ -17,30 +17,125 @@
  */
 
 #include "scene.h"
+#include "photon.h"
+#include <iostream>
+#include <random>
 
 Scene::Scene() {
     object_list = 0;
     light_list = 0;
 }
 
-// TODO: Pass 1: Constructing the Photon Maps
+// Pass 1: Constructing the Photon Maps
 void Scene::construct_photon_map(int photon_count) {
-    Light *light = light_list;
-    while (light != (Light *)0) {
+    Light* light = light_list;
+    while (light != (Light*) 0) {
         // cast to PointLight
         PointLight* point_light = dynamic_cast<PointLight*>(light);
         if (point_light == nullptr) continue;
         // shoot photons into scene
         for (int i = 0; i < photon_count; i++) {
-
-            
-
-
-
+            Ray ray = create_light_ray(
+                point_light->get_position(), 
+                point_light->get_direction()
+            );
+            light_trace(ray, point_light, 0);
         }
 
         light = light->next;
     }
+}
+
+void Scene::light_trace(Ray ray, PointLight* source, int depth) {
+    if (depth > 2) return;
+
+    Hit* hit = trace(ray);
+
+    Photon* photon = new Photon(
+        source->get_intensity(), 
+        hit->what, 
+        hit->position, 
+        hit->normal, 
+        source
+    );
+
+    // decide reflected or absorbed
+    float p_d, p_s;
+    hit->what->material->get_diffuse_specular_probs(p_d, p_s, *hit, ray);
+
+    float r = random_float(0.f, 1.f);
+    if (r < p_d) {
+        // absorb
+        photon->set_type((depth == 0) ? Direct : Indirect);
+        photon->set_intensity(photon->intensity * (1.f/p_d)); //TODO: check
+        //TODO: add to KD tree 
+
+        // do diffuse reflection
+        Ray rray = create_light_ray(photon->position, photon->normal);
+        light_trace(rray, source, depth+1);
+
+    } else if (r < p_d + p_s) {
+        // do specular reflection
+        Ray rray = Ray(
+            photon->position + (0.0001f * rray.direction),
+            ray.direction - ((2.0 * photon->normal.dot(ray.direction)) * photon->normal)
+        ); // normal reflection bounce
+        light_trace(rray, source, depth+1);
+
+    } else {
+        // absorb
+        photon->set_type(Direct);
+        photon->set_intensity(photon->intensity * (1.f/p_d)); //TODO: check
+
+        // TODO: add to KD tree
+    }
+
+    // shadow photons
+    // point far along ray and reverse ray
+    Vertex sray_pos = photon->position + (INFINITY * source->get_direction());
+    Vector sray_dir = source->get_direction().negated();
+    Hit* shadow_hit = 0;
+    while(true) {
+        // check every hit until reach original photon
+        Ray sray = Ray(sray_pos, sray_dir);
+        shadow_hit = trace(sray);
+
+        if (shadow_hit->position.isEqual(photon->position) ||
+            shadow_hit == 0) break;
+
+        Colour shadow_intensity = shadow_hit->what->material->ambient;
+        Photon* shadow_photon = new Photon(
+            shadow_intensity, 
+            shadow_hit->what, 
+            shadow_hit->position, 
+            shadow_hit->normal, 
+            source
+        );
+        shadow_photon->set_type(Shadow);
+        //TODO: add to KD tree
+
+        sray_pos = shadow_photon->position + (0.0001f * sray_dir);
+    }
+}
+
+float random_float(float min, float max) {
+    std::random_device rand;
+    std::mt19937 range(rand());
+    std::uniform_real_distribution<float> distribution(min, max);
+    return distribution(range);
+}
+
+Ray create_light_ray(Vertex pos, Vector dir) {
+    
+    float r1 = random_float(-100.f, 100.f), 
+    r2 = random_float(-100.f, 100.f), 
+    r3 = random_float(-100.f, 100.f);
+
+    Vector ldir = Vector(dir.x * r1, dir.y * r2, dir.z * r3);
+    ldir.normalise();
+    if (ldir.dot(dir) < 0.f) ldir.negate();
+
+    return Ray(pos + (0.0001f * dir), dir);
 }
 
 bool Scene::shadowtrace(Ray ray, float limit) {

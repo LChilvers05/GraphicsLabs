@@ -1,53 +1,56 @@
 /****************************************************************************
-*
-* krt - Ken's Raytracer - Coursework Edition. (C) Copyright 1993-2022.
-*
-* I've put a lot of time and effort into this code. For the last decade
-* it's been used to introduce hundreds of students at multiple universities
-* to raytracing. It forms the basis of your coursework but you are free
-* to continue using/developing forever more. However, I ask that you don't
-* share the code or your derivitive versions publicly. In order to continue
-* to be used for coursework and in particular assessment it's important that
-* versions containing solutions are not searchable on the web or easy to
-* download.
-*
-* If you want to show off your programming ability, instead of releasing
-* the code, consider generating an incredible image and explaining how you
-* produced it.
-*/
+ *
+ * krt - Ken's Raytracer - Coursework Edition. (C) Copyright 1993-2022.
+ *
+ * I've put a lot of time and effort into this code. For the last decade
+ * it's been used to introduce hundreds of students at multiple universities
+ * to raytracing. It forms the basis of your coursework but you are free
+ * to continue using/developing forever more. However, I ask that you don't
+ * share the code or your derivitive versions publicly. In order to continue
+ * to be used for coursework and in particular assessment it's important that
+ * versions containing solutions are not searchable on the web or easy to
+ * download.
+ *
+ * If you want to show off your programming ability, instead of releasing
+ * the code, consider generating an incredible image and explaining how you
+ * produced it.
+ */
 
 // Material is the base class for materials.
 
 #pragma once
 
 #include "colour.h"
-#include "ray.h"
 #include "hit.h"
-
+#include "ray.h"
 
 class Material {
-public:
+   public:
 
-	// compute_once is called once per intersection
-	virtual Colour compute_once(Ray &viewer, Hit &hit, int recurse)
-	{
-		Colour result;
-		result.r = 0.0f;
-		result.g = 0.0f;
-		result.b = 0.0f;
-		return result;
+    Colour ambient;
+
+    // compute_once is called once per intersection
+    virtual Colour compute_once(Ray& viewer, Hit& hit, int recurse) {
+        Colour result;
+        result.r = 0.0f;
+        result.g = 0.0f;
+        result.b = 0.0f;
+        return result;
+    }
+
+    // compute_per_light is called for each light that reaches a surface
+    virtual Colour compute_per_light(Vector& viewer, Hit& hit, Vector& ldir) {
+        Colour result;
+        result.r = 0.0f;
+        result.g = 0.0f;
+        result.b = 0.0f;
+        return result;
+    }
+
+    // TODO: You will need additional material methods to support Photon-mapping.
+
+    virtual void get_diffuse_specular_probs(float& p_d, float& p_s, Hit& hit, Ray ray) {
+		p_d = 0.0f;
+		p_s = 0.0f;
 	}
-
-	// compute_per_light is called for each light that reaches a surface
-	virtual Colour compute_per_light(Vector &viewer, Hit &hit, Vector &ldir)
-	{
-		Colour result;
-		result.r = 0.0f;
-		result.g = 0.0f;
-		result.b = 0.0f;
-		return result;
-	}
-
-	// You will need additional material methods to support Photon-mapping.
-
 };

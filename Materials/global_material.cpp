@@ -125,3 +125,12 @@ void GlobalMaterial::fresnel(float& n, float& cos_i, float& cos_t, Hit& hit, boo
 		refract_weight = Colour(kt, kt, kt);
 	}
 }
+
+void GlobalMaterial::get_diffuse_specular_probs(float& p_d, float& p_s, Hit& hit, Ray ray) {
+	float cos_i = hit.normal.dot(ray.direction), cos_t, n;
+	bool is_tir = false;
+	fresnel(n, cos_i, cos_t, hit, is_tir);
+
+	p_d = refract_weight.r;
+	p_s = reflect_weight.r;
+}

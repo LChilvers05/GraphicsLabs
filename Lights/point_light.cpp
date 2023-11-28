@@ -13,6 +13,14 @@ Vertex PointLight::get_position() {
     return position;
 }
 
+Vector PointLight::get_direction() {
+    return direction;
+}
+
+Colour PointLight::get_intensity() {
+    return intensity;
+}
+
 bool PointLight::get_direction(Vertex &surface, Vector &dir) {
 	dir = direction;
     return true;

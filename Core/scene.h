@@ -55,6 +55,9 @@ public:
   // raytrace a shadow ray.
   bool shadowtrace(Ray, float limit);
 
+  // raytrace a light ray for photon mapping.
+  void light_trace(Ray ray, PointLight* source, int depth);
+
   void add_object(Object *obj);
   void add_light(Light *light);
 
