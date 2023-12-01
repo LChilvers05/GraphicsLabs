@@ -25,6 +25,12 @@
 #include "point_light.h"
 #include "hit.h"
 #include "environment.h"
+#include "vertex.h"
+#include "../Tree/tree.h"
+#include "photon.h"
+
+#include <iostream>
+#include <random>
 
 
 // Scene is a class that is used to build a scene database of objects
@@ -33,6 +39,10 @@
 class Scene: public Environment {
 public:
 
+  // to store photons in
+  typedef KD::Core<3, Photon> CORE;
+  KD::Tree<CORE>* kd_tree;
+
   Object *object_list;
   Light *light_list;
 
@@ -40,6 +50,8 @@ public:
 
   // Emit photons from light sources and construct photo map (pass 1)
   void construct_photon_map(int photon_count);
+
+  Ray create_light_ray(Vertex pos, Vector dir);
 
   // Filter the list of returned hits to the closest +ve
   Hit* select_first(Hit* list);
@@ -61,4 +73,10 @@ public:
   void add_object(Object *obj);
   void add_light(Light *light);
 
+  float random_float(float min, float max) {
+      std::random_device rand;
+      std::mt19937 range(rand());
+      std::uniform_real_distribution<float> distribution(min, max);
+      return distribution(range);
+  }
 };

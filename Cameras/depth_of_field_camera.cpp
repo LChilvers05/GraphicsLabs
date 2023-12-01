@@ -1,8 +1,5 @@
 #include "depth_of_field_camera.h"
 
-#include <iostream>
-#include <random>
-
 DepthOfFieldCamera::DepthOfFieldCamera() {
     fov = 0.5f;
 }
@@ -61,10 +58,8 @@ Ray DepthOfFieldCamera::get_primary_ray(int p_x, int p_y) {
 Ray DepthOfFieldCamera::get_secondary_ray(Ray& primary_ray) {
 
     // generate random multipliers for direction
-    std::random_device rand;
-    std::mt19937 range(rand());
-    std::uniform_real_distribution<float> distribution(-aperature, aperature);
-    float r1 = distribution(range), r2 = distribution(range);
+    float r1 = random_float(-aperature, aperature);
+    float r2 = random_float(-aperature, aperature);
 
     // point where all secondary (and primary) rays will meet
     Vertex convergence = primary_ray.position + (focal_length * primary_ray.direction);

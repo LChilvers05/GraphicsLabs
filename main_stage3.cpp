@@ -14,7 +14,7 @@
 #include "quadratic_object.h"
 
 // classes that contain our lights, all derived from Light
-#include "directional_light.h"
+#include "point_light.h"
 
 // classes that contain the materials applied to an object, all derived from Material
 #include "global_material.h"
@@ -26,9 +26,9 @@
 
 using namespace std;
 
-DirectionalLight* make_light(const Vector& ldir) {
+PointLight* make_light(const Vertex& lpos, const Vector& ldir) {
 	Colour lColour = Colour(255.0f, 255.0f, 255.0f);
-	DirectionalLight* light = new DirectionalLight(ldir, lColour);
+	PointLight* light = new PointLight(lpos, ldir, lColour);
 	return light;
 }
 
@@ -37,35 +37,30 @@ void make_cornell_box(Scene& scene) {
 	Phong* green = new Phong(Colour(0.f, 255.f, 0.f));
 	Phong* red = new Phong(Colour(255.f, 0.f, 0.f));
 
-	PolyMesh* floor = new PolyMesh((char *)"OBJs/cornell_floor.obj");
-	floor->set_material(white);
-	PolyMesh* roof = new PolyMesh((char *)"OBJs/cornell_roof.obj");
-	roof->set_material(white);
-	PolyMesh* back = new PolyMesh((char *)"OBJs/cornell_back.obj");
-	back->set_material(white);
+	PolyMesh* box = new PolyMesh((char *)"OBJs/cornell_box.obj");
+	box->set_material(white);
 	PolyMesh* right = new PolyMesh((char *)"OBJs/cornell_right.obj");
 	right->set_material(green);
 	PolyMesh* left = new PolyMesh((char *)"OBJs/cornell_left.obj");
 	left->set_material(red);
 
-    scene.add_object(floor);
-	scene.add_object(roof);
-	scene.add_object(back);
+    scene.add_object(box);
 	scene.add_object(left);
 	scene.add_object(right);
 }
 
 void build_scene(Scene& scene) {
     // cornell box
+	// TODO: cornell box is buggy
 	make_cornell_box(scene);
 
 	Phong* blue = new Phong(Colour(0.f, 0.f, 255.f));
-	Sphere* blue_sphere = new Sphere(Vertex(0.f, 10.f, 10.f), 5.f);
+	Sphere* blue_sphere = new Sphere(Vertex(0.f, 10.f, 5.f), 5.f);
 	blue_sphere->set_material(blue);
 	scene.add_object(blue_sphere);
 
     // light
-    scene.add_light(make_light(Vector(1.f, 0.f, 1.f)));
+    scene.add_light(make_light(Vertex(0.f, 9.f, 5.f), Vector(0.f, -1.f, 0.f)));
 }
 
 int main(int argc, char *argv[]) {
@@ -76,8 +71,13 @@ int main(int argc, char *argv[]) {
 	Vector p_lookat = Vector(0.0001f, 0.0001f, 1.f);
 	Vector p_up = Vector(0.f, 1.f, 0.f);
 	Camera *camera = new FullCamera(0.6f, p_position, p_lookat, p_up);
-	
-	camera->render(scene,*fb);
+
+	// PASS 1: Construct Photon Map
+	int photon_count = 1000;
+	scene.construct_photon_map(photon_count);
+
+	// PASS 2: Render
+	camera->render(scene, *fb);
 	fb->writeRGBFile((char *)"photon_mapping.ppm");
 	
 	cerr << "\nDone.\n" << flush;

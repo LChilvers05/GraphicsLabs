@@ -2,6 +2,8 @@
 #define _FULL_CAMERA_H_
 
 #include "camera.h"
+#include <iostream>
+#include <random>
 
 class DepthOfFieldCamera: public Camera {
 public:
@@ -33,6 +35,12 @@ private:
 
   void make_orthonormal_bases(Vertex& eye, Vertex& look, Vector& up);
 
+  float random_float(float min, float max) {
+    std::random_device rand;
+    std::mt19937 range(rand());
+    std::uniform_real_distribution<float> distribution(min, max);
+    return distribution(range);
+  }
 };
 
 #endif
