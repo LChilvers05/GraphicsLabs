@@ -20,8 +20,8 @@ public:
 
 	Phong(Colour ambient) {
 		this->ambient = ambient;
-		this->k_d = 1.f;
-		this->k_s = 0.2f;
+		this->k_d = 0.5f;
+		this->k_s = 0.4f;
 	}
 
 	Phong(Colour ambient, float k_d, float k_s) {

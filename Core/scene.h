@@ -39,6 +39,8 @@
 class Scene: public Environment {
 public:
 
+  bool is_photon_mapping;
+  
   // to store photons in
   typedef KD::Core<3, Photon> CORE;
   KD::Tree<CORE>* kd_tree;

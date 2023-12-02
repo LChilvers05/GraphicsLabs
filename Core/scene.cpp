@@ -17,8 +17,11 @@
  */
 
 #include "scene.h"
+#include <vector>
+#include <algorithm>
 
 Scene::Scene() {
+    is_photon_mapping = false;
     object_list = 0;
     light_list = 0;
 
@@ -30,6 +33,8 @@ Scene::Scene() {
 
 // Pass 1: Constructing the Photon Maps
 void Scene::construct_photon_map(int photon_count) {
+    is_photon_mapping = true;
+
     Light* light = light_list;
     while (light != (Light*) 0) {
         // cast to PointLight
@@ -49,7 +54,7 @@ void Scene::construct_photon_map(int photon_count) {
 }
 
 void Scene::light_trace(Ray ray, PointLight* source, int depth) {
-    if (depth > 2) return;
+    if (depth > 3) return;
 
     Hit* hit = this->trace(ray);
     if (hit == 0) return;
@@ -65,7 +70,7 @@ void Scene::light_trace(Ray ray, PointLight* source, int depth) {
     // decide reflected or absorbed
     float p_d, p_s;
     hit->what->material->get_diffuse_specular_probs(p_d, p_s, *hit, ray);
-
+    // Russian Roulette
     float r = random_float(0.f, 1.f);
     if (r < p_d) {
         // absorb
@@ -93,8 +98,8 @@ void Scene::light_trace(Ray ray, PointLight* source, int depth) {
 
     // shadow photons
     // point far along ray and reverse ray
-    Vertex sray_pos = photon.get_position() + (INFINITY * source->get_direction());
-    Vector sray_dir = source->get_direction().negated();
+    Vertex sray_pos = photon.get_position() + (INFINITY * ray.direction);
+    Vector sray_dir = ray.direction.negated();
     Hit* shadow_hit = 0;
     while(true) {
         // check every hit until reach original photon
@@ -125,12 +130,12 @@ void Scene::light_trace(Ray ray, PointLight* source, int depth) {
 }
 
 Ray Scene::create_light_ray(Vertex pos, Vector dir) {
-    
-    float r1 = random_float(-100.f, 100.f), 
-    r2 = random_float(-100.f, 100.f), 
-    r3 = random_float(-100.f, 100.f);
 
-    Vector ldir = Vector(dir.x * r1, dir.y * r2, dir.z * r3);
+    Vector ldir = Vector(
+        random_float(-100.f, 100.f),
+        random_float(-100.f, 100.f),
+        random_float(-100.f, 100.f)
+    );
     ldir.normalise();
     if (ldir.dot(dir) < 0.f) ldir.negate();
 
@@ -202,47 +207,114 @@ void Scene::raytrace(Ray ray, int recurse, Colour &colour, float &depth) {
         depth = best_hit->t;
         // this will be the global components
         // such as ambient or reflect/refract
-        colour = colour + best_hit->what->material->compute_once(ray, *best_hit, recurse);  
+        colour = colour + best_hit->what->material->compute_once(ray, *best_hit, recurse);
 
-        // next, compute the light contribution for each light in the scene.
-        Light *light = light_list;
-        while (light != (Light *)0) {
-            Vector viewer;
-            Vector ldir;
+        bool is_shadow_tracing = true;
+        bool is_accurate_calc = true;
 
-            viewer = -ray.direction;
-            viewer.normalise();
+        // Pass 2: Rendering with photon map
+        if (is_photon_mapping) {
+            vector<Photon> photons = kd_tree->within(Photon(best_hit->position), 2.0);
 
-            bool lit;
-            lit = light->get_direction(best_hit->position, ldir);
-			ldir.normalise();
+            Colour sum_intensity;
+                for (int i = 0; i < photons.size(); i++) { 
+                    Photon p = photons[i];
+                    sum_intensity = sum_intensity + p.intensity; 
+                }
+                Colour average_intensity = sum_intensity * (1.f / photons.size());
+                colour = colour + average_intensity;
 
-            if (ldir.dot(best_hit->normal) > 0) {
-                lit = false;  // light is facing wrong way.
+            is_accurate_calc = false;
+
+            bool has_direct = false;
+            bool has_indirect = false;
+            bool has_shadow = false;
+
+            for (size_t i = 0; i < photons.size(); ++i) {
+                if (photons[i].type == 1) {
+                    has_direct = true;
+                } else if (photons[i].type == 2) {
+                    has_indirect = true;
+                } else if (photons[i].type == 3) {
+                    has_shadow = true;
+                }
             }
 
-			//so shadow ray doesn't start behind object
-			Vertex shadow_ray_start = best_hit->position - (0.0001f * ldir); 
-			Ray shadow_ray = Ray(shadow_ray_start, -ldir);
-			bool inShadow = shadowtrace(shadow_ray, 200.0f);
-            if (lit == true && inShadow) {
-				lit = false;
+            if (has_direct && !has_indirect && !has_shadow) {
+                // sample is only direct photons
+                // is_shadow_tracing = false;
+                // is_accurate_calc = true;
+            } else if (has_direct && !has_indirect && has_shadow) {
+                // sample is direct and shadow photons
+                // is_shadow_tracing = true;
+                // is_accurate_calc = true;
+            } else if (has_direct && has_indirect && has_shadow) {
+                // sample is direct, indirect and shadow photons
+                // is_accurate_calc = false;
+
+                Colour sum_intensity;
+                for (int i = 0; i < photons.size(); i++) { 
+                    Photon p = photons[i];
+                    sum_intensity = sum_intensity + p.intensity; 
+                }
+                Colour average_intensity = sum_intensity * (1.f / photons.size());
+                colour = colour + average_intensity;
             }
+        }
+        //!!!
 
-            if (lit) {
-                Colour intensity;
+        if (is_accurate_calc) {
 
-                light->get_intensity(best_hit->position, intensity);
+            
+            // next, compute the light contribution for each light in the scene.
+            Light *light = light_list;
+            while (light != (Light *)0) {
+                Vector ldir;
+                Vector viewer = -ray.direction;
+                viewer.normalise();
 
-                colour =
-                    colour +
-                    intensity * best_hit->what->material->compute_per_light(
-                                    viewer, *best_hit,
-                                    ldir);  // this is the per light local
-                                            // contrib e.g. diffuse, specular
+                bool lit = light->get_direction(best_hit->position, ldir);
+                ldir.normalise();
+
+                // so shadow ray doesn't start behind object
+                Vertex sray_pos = best_hit->position - (0.0001f * ldir);
+                Ray sray = Ray(sray_pos, -ldir);
+
+                float limit = 999.f;
+                PointLight *point_light = dynamic_cast<PointLight *>(light);
+                if (point_light != nullptr) {
+                    // decide shadow based on position of light
+                    limit = (point_light->get_position() - sray_pos).length();
+                }
+
+                // light is facing wrong way.
+                if (ldir.dot(best_hit->normal) > 0) {
+                    lit = false;
+                }
+
+                if (!is_photon_mapping && is_shadow_tracing) {
+
+
+                    bool inShadow = shadowtrace(sray, limit);
+                    if (lit == true && inShadow) {
+                        lit = false;
+                    }
+                }
+
+                if (lit) {
+                    Colour intensity;
+                    light->get_intensity(best_hit->position, intensity);
+
+                    colour = colour +
+                             intensity *
+                                 best_hit->what->material->compute_per_light(
+                                     viewer, *best_hit,
+                                     ldir);  // this is the per light local
+                                             // contrib e.g. diffuse, specular
+                }
+
+                light = light->next;
             }
-
-            light = light->next;
         }
 
         delete best_hit;

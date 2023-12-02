@@ -51,16 +51,15 @@ void make_cornell_box(Scene& scene) {
 
 void build_scene(Scene& scene) {
     // cornell box
-	// TODO: cornell box is buggy
 	make_cornell_box(scene);
 
 	Phong* blue = new Phong(Colour(0.f, 0.f, 255.f));
-	Sphere* blue_sphere = new Sphere(Vertex(0.f, 10.f, 5.f), 5.f);
+	Sphere* blue_sphere = new Sphere(Vertex(-5.f, 4.f, 10.f), 4.f);
 	blue_sphere->set_material(blue);
 	scene.add_object(blue_sphere);
 
     // light
-    scene.add_light(make_light(Vertex(0.f, 9.f, 5.f), Vector(0.f, -1.f, 0.f)));
+    scene.add_light(make_light(Vertex(0.f, 19.f, 5.f), Vector(0.f, -1.f, 0.f)));
 }
 
 int main(int argc, char *argv[]) {
@@ -73,8 +72,8 @@ int main(int argc, char *argv[]) {
 	Camera *camera = new FullCamera(0.6f, p_position, p_lookat, p_up);
 
 	// PASS 1: Construct Photon Map
-	int photon_count = 1000;
-	scene.construct_photon_map(photon_count);
+	int photon_count = 100000;
+	// scene.construct_photon_map(photon_count);
 
 	// PASS 2: Render
 	camera->render(scene, *fb);

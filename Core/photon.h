@@ -14,12 +14,16 @@ class Photon {
     int type; //1 = direct, 2 = indirect, 3 = shadow
     PointLight* source;
 
-    Photon() {}
+    Photon() {
+        this->type = -1;
+    }
     
     Photon(Vertex position) {
         this->position[0] = position.x;
         this->position[1] = position.y;
         this->position[2] = position.z;
+
+        this->type = -1;
     }
 
     Photon(Colour intensity, Object* what, Vertex position, Vector normal,
@@ -33,6 +37,8 @@ class Photon {
         this->position[0] = position.x;
         this->position[1] = position.y;
         this->position[2] = position.z;
+
+        this->type = -1;
     }
 
     Vertex get_position() {
