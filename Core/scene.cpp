@@ -56,20 +56,22 @@ void Scene::construct_photon_map(int photon_count) {
 void Scene::light_trace(Ray ray, PointLight* source, int depth) {
     if (depth > 3) return;
 
-    Hit* hit = this->trace(ray);
-    if (hit == 0) return;
+    Hit* hit_p = this->trace(ray);
+    if (hit_p == 0) return;
+
+    Hit hit = *hit_p;
 
     Photon photon = Photon(
         source->get_intensity(), 
-        hit->what, 
-        hit->position, 
-        hit->normal, 
+        hit.what, 
+        hit.position, 
+        hit.normal, 
         source
     );
 
     // decide reflected or absorbed
     float p_d, p_s;
-    hit->what->material->get_diffuse_specular_probs(p_d, p_s, *hit, ray);
+    hit.what->material->get_diffuse_specular_probs(p_d, p_s, hit, ray);
     // Russian Roulette
     float r = random_float(0.f, 1.f);
     if (r < p_d) {
@@ -98,23 +100,24 @@ void Scene::light_trace(Ray ray, PointLight* source, int depth) {
 
     // shadow photons
     // point far along ray and reverse ray
-    Vertex sray_pos = photon.get_position() + (INFINITY * ray.direction);
+    Vertex sray_pos = photon.get_position() + (300.f * ray.direction);
     Vector sray_dir = ray.direction.negated();
-    Hit* shadow_hit = 0;
+    Hit* shadow_hit_p = 0;
     while(true) {
         // check every hit until reach original photon
         Ray sray = Ray(sray_pos, sray_dir);
-        shadow_hit = trace(sray);
+        shadow_hit_p = this->trace(sray);
 
-        if (shadow_hit == 0 ||
-            shadow_hit->position.isEqual(photon.get_position())) break;
+        if (shadow_hit_p == 0 ||
+            shadow_hit_p->position.isEqual(photon.get_position())) break;
+        Hit shadow_hit = *shadow_hit_p;
 
-        Colour shadow_intensity = shadow_hit->what->material->ambient;
+        Colour shadow_intensity = shadow_hit.what->material->ambient;
         Photon shadow_photon = Photon(
             shadow_intensity, 
-            shadow_hit->what, 
-            shadow_hit->position, 
-            shadow_hit->normal, 
+            shadow_hit.what, 
+            shadow_hit.position, 
+            shadow_hit.normal, 
             source
         );
         shadow_photon.set_type(3);
@@ -122,11 +125,11 @@ void Scene::light_trace(Ray ray, PointLight* source, int depth) {
 
         sray_pos = shadow_photon.get_position() + (0.0001f * sray_dir);
         
-        delete shadow_hit;
+        delete shadow_hit_p;
     }
 
-    delete hit;
-    delete shadow_hit;
+    delete hit_p;
+    delete shadow_hit_p;
 }
 
 Ray Scene::create_light_ray(Vertex pos, Vector dir) {
@@ -137,7 +140,7 @@ Ray Scene::create_light_ray(Vertex pos, Vector dir) {
         random_float(-100.f, 100.f)
     );
     ldir.normalise();
-    if (ldir.dot(dir) < 0.f) ldir.negate();
+    if (ldir.dot(dir) < 0) ldir.negate();
 
     return Ray(pos + (0.0001f * ldir), ldir);
 }
@@ -214,43 +217,10 @@ void Scene::raytrace(Ray ray, int recurse, Colour &colour, float &depth) {
 
         // Pass 2: Rendering with photon map
         if (is_photon_mapping) {
-            vector<Photon> photons = kd_tree->within(Photon(best_hit->position), 2.0);
+            try {
+                vector<Photon> photons = kd_tree->within(Photon(best_hit->position), 1.0);
 
-            Colour sum_intensity;
-                for (int i = 0; i < photons.size(); i++) { 
-                    Photon p = photons[i];
-                    sum_intensity = sum_intensity + p.intensity; 
-                }
-                Colour average_intensity = sum_intensity * (1.f / photons.size());
-                colour = colour + average_intensity;
-
-            is_accurate_calc = false;
-
-            bool has_direct = false;
-            bool has_indirect = false;
-            bool has_shadow = false;
-
-            for (size_t i = 0; i < photons.size(); ++i) {
-                if (photons[i].type == 1) {
-                    has_direct = true;
-                } else if (photons[i].type == 2) {
-                    has_indirect = true;
-                } else if (photons[i].type == 3) {
-                    has_shadow = true;
-                }
-            }
-
-            if (has_direct && !has_indirect && !has_shadow) {
-                // sample is only direct photons
-                // is_shadow_tracing = false;
-                // is_accurate_calc = true;
-            } else if (has_direct && !has_indirect && has_shadow) {
-                // sample is direct and shadow photons
-                // is_shadow_tracing = true;
-                // is_accurate_calc = true;
-            } else if (has_direct && has_indirect && has_shadow) {
-                // sample is direct, indirect and shadow photons
-                // is_accurate_calc = false;
+                is_accurate_calc = false;
 
                 Colour sum_intensity;
                 for (int i = 0; i < photons.size(); i++) { 
@@ -259,13 +229,49 @@ void Scene::raytrace(Ray ray, int recurse, Colour &colour, float &depth) {
                 }
                 Colour average_intensity = sum_intensity * (1.f / photons.size());
                 colour = colour + average_intensity;
+            } catch (...) {
+                int x = 1;
             }
+
+            // is_accurate_calc = false;
+
+            // bool has_direct = false;
+            // bool has_indirect = false;
+            // bool has_shadow = false;
+
+            // Colour sum_intensity;
+            // for (int i = 0; i < photons.size(); i++) {
+            //     Photon p = photons[i];
+            //     sum_intensity = sum_intensity + p.intensity;
+
+            //     if (photons[i].type == 1) {
+            //         has_direct = true;
+            //     } else if (photons[i].type == 2) {
+            //         has_indirect = true;
+            //     } else if (photons[i].type == 3) {
+            //         has_shadow = true;
+            //     }
+            // }
+
+            // if (has_direct && !has_indirect && !has_shadow) {
+            //     // sample is only direct photons
+            //     is_shadow_tracing = false;
+            //     is_accurate_calc = true;
+            // } else if (has_direct && !has_indirect && has_shadow) {
+            //     // sample is direct and shadow photons
+            //     is_shadow_tracing = true;
+            //     is_accurate_calc = true;
+            // } else if (has_direct && has_indirect && has_shadow) {
+            //     // sample is direct, indirect and shadow photons
+            //     is_accurate_calc = false;
+
+            //     Colour average_intensity = sum_intensity * (1.f / photons.size());
+            //     colour = colour + average_intensity;
+            // }
         }
         //!!!
 
         if (is_accurate_calc) {
-
-            
             // next, compute the light contribution for each light in the scene.
             Light *light = light_list;
             while (light != (Light *)0) {
@@ -292,7 +298,7 @@ void Scene::raytrace(Ray ray, int recurse, Colour &colour, float &depth) {
                     lit = false;
                 }
 
-                if (!is_photon_mapping && is_shadow_tracing) {
+                if (is_shadow_tracing) {
 
 
                     bool inShadow = shadowtrace(sray, limit);
@@ -306,11 +312,12 @@ void Scene::raytrace(Ray ray, int recurse, Colour &colour, float &depth) {
                     light->get_intensity(best_hit->position, intensity);
 
                     colour = colour +
-                             intensity *
-                                 best_hit->what->material->compute_per_light(
-                                     viewer, *best_hit,
-                                     ldir);  // this is the per light local
-                                             // contrib e.g. diffuse, specular
+                            intensity *
+                            best_hit->what->material->compute_per_light(
+                                viewer, 
+                                *best_hit,
+                                ldir
+                            );
                 }
 
                 light = light->next;

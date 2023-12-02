@@ -73,7 +73,7 @@ int main(int argc, char *argv[]) {
 
 	// PASS 1: Construct Photon Map
 	int photon_count = 100000;
-	// scene.construct_photon_map(photon_count);
+	scene.construct_photon_map(photon_count);
 
 	// PASS 2: Render
 	camera->render(scene, *fb);

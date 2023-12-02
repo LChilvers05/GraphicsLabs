@@ -186,10 +186,14 @@ public:
 
 	bool isEqual(const Vector& other) {
 		return (
-			this->x == other.x &&
-			this->y == other.y &&
-			this->z == other.z
+			round(this->x) == round(other.x) &&
+			round(this->y) == round(other.y) &&
+			round(this->z) == round(other.z)
 		);
+	}
+
+	float round(float val) {
+		return floorf(val * 100) / 100;
 	}
 };
 
