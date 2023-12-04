@@ -59,7 +59,7 @@ void build_scene(Scene& scene) {
 	scene.add_object(blue_sphere);
 
     // light
-    scene.add_light(make_light(Vertex(0.f, 19.f, 5.f), Vector(0.f, -1.f, 0.f)));
+    scene.add_light(make_light(Vertex(0.f, 19.5f, 5.f), Vector(0.f, -1.f, 0.f)));
 }
 
 int main(int argc, char *argv[]) {
@@ -72,12 +72,12 @@ int main(int argc, char *argv[]) {
 	Camera *camera = new FullCamera(0.6f, p_position, p_lookat, p_up);
 
 	// PASS 1: Construct Photon Map
-	int photon_count = 100000;
+	int photon_count = 300000;
 	scene.construct_photon_map(photon_count);
 
 	// PASS 2: Render
 	camera->render(scene, *fb);
-	fb->writeRGBFile((char *)"photon_mapping.ppm");
+	fb->writeRGBFile((char *)"test.ppm");
 	
 	cerr << "\nDone.\n" << flush;
 	cerr << "Hit Pool " << Hit::pool_size << " Allocated " << Hit::allocated << "\n" << flush;

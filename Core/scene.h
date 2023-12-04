@@ -40,6 +40,8 @@ class Scene: public Environment {
 public:
 
   bool is_photon_mapping;
+  Vertex scene_min;
+  Vertex scene_max;
   
   // to store photons in
   typedef KD::Core<3, Photon> CORE;
@@ -70,7 +72,7 @@ public:
   bool shadowtrace(Ray, float limit);
 
   // raytrace a light ray for photon mapping.
-  void light_trace(Ray ray, PointLight* source, int depth);
+  void light_trace(Ray ray, Colour intensity, int depth);
 
   void add_object(Object *obj);
   void add_light(Light *light);

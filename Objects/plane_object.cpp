@@ -92,6 +92,7 @@ Hit* Plane::intersection(Ray ray)
 		hit2->what = this;
 		hit1->next = hit2;
 		hit2->next = 0;
+		
 		return hit1;
 	}
 }

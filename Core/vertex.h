@@ -82,4 +82,11 @@ public:
 		return r;
 	}
 
+	bool is_within(const Vertex& min, const Vertex& max) {
+		if (this->x < min.x || this->y < min.y || this->z < min.z) return false;
+		if (this->x > max.x || this->y > max.y || this->z > max.z) return false;
+		
+		return true;
+	}
+
 };

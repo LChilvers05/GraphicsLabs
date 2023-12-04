@@ -49,7 +49,7 @@ void build_scene(Scene& scene) {
     red_sphere->set_material(red);
     scene.add_object(red_sphere);
 
-	Sphere* green_sphere = new Sphere(Vertex(-10.f, 2.f, 2.f), 3.f);
+	Sphere* green_sphere = new Sphere(Vertex(-10.f, 2.f, 10.f), 5.f);
     green_sphere->set_material(green);
     scene.add_object(green_sphere);
 }
@@ -66,16 +66,16 @@ int main(int argc, char *argv[]) {
 	build_scene(scene);
 
 	// look down y-axis
-	Vertex p_position = Vertex(0.f, 0.f, -20.f);
+	Vertex p_position = Vertex(0.f, 0.f, -16.f);
 	Vector p_lookat = Vector(0.f, 0.f, 1.f);
 	Vector p_up = Vector(0.f, 1.f, 0.f);
-	Camera *camera = new DepthOfFieldCamera(0.6f, 20.f, 3.f, p_position, p_lookat, p_up);
+	Camera *camera = new DepthOfFieldCamera(0.6f, 16.f, 0.2f, p_position, p_lookat, p_up);
 	
 	// Camera generates rays for each pixel in the framebuffer and records colour + depth.
 	camera->render(scene,*fb);
 	
 	// Output the framebuffer colour and depth as two images
-	fb->writeRGBFile((char *)"depth_of_field.ppm");
+	fb->writeRGBFile((char *)"final_dof_16_02.ppm");
 	// fb->writeDepthFile((char *)"depth.ppm");
 	
 	cerr << "\nDone.\n" << flush;

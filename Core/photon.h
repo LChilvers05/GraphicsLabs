@@ -7,12 +7,10 @@ struct Photon {
    public:
 
     float data[3];  // for KD tree
-    float t;            // distance to source light
     Colour intensity;
     Object* what;
     Vector normal;
     int type; //1 = direct, 2 = indirect, 3 = shadow
-    PointLight* source;
 
     Photon() {
         this->data[0] = 0.0;
@@ -28,13 +26,10 @@ struct Photon {
         this->type = -1;
     }
 
-    Photon(Colour intensity, Object* what, Vertex position, Vector normal,
-           PointLight* source) {
+    Photon(Colour intensity, Object* what, Vertex position, Vector normal) {
         this->intensity = intensity;
         this->what = what;
         this->normal = normal;
-        this->source = source;
-        this->t = (source->get_position() - position).length();
 
         this->data[0] = position.x;
         this->data[1] = position.y;

@@ -88,10 +88,6 @@ public:
 		z = -z;
 	}
 
-	Vector negated() {
-		return Vector(-x, -y, -z);
-	}
-
 	void cross(Vector &other, Vector &result)
 	{
 	  result.x = y*other.z - z*other.y;
