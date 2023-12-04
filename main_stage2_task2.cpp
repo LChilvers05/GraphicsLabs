@@ -12,6 +12,7 @@
 #include "sphere_object.h"
 #include "plane_object.h"
 #include "quadratic_object.h"
+#include "csg_object.h"
 
 // classes that contain our lights, all derived from Light
 #include "directional_light.h"
@@ -39,6 +40,7 @@ void build_scene(Scene& scene) {
 
 	// 3) elliptic cone = 0 = x2/a2 + y2/b2 - z2/c2
 	Quadratic* surface = new Quadratic(0.25f, 0, 0, 0, 0.25f, 0, 0, -0.25f, 0, 0);
+	surface->set_material(mat);
 
 	// 4) hyperboloid of two sheets 1 = -x2/a2 - y2/b2 + z2/c2
 	// Quadratic* surface = new Quadratic(-0.25f, 0, 0, 0, -0.25f, 0, 0, 0.25f, 0, -1);
@@ -49,17 +51,17 @@ void build_scene(Scene& scene) {
 	// 6) ellipsoid = 1 = x2/a2 + y2/b2 - z2/c2
 	// Quadratic* surface = new Quadratic(0.25f, 0, 0, 0, 0.25f, 0, 0, 0.25f, 0, -1);
 
-	// rotate around z axis 90deg
-	Transform y_rot = Transform(
-		0, 0, 1, 0,
-		0, 1, 0, 0,
-		-1, 0, 0, 0,
-		0, 0, 0, 1
-	);
-	surface->apply_transform(y_rot);
+    // surface->set_material(mat);
+    // scene.add_object(surface);
 
-    surface->set_material(mat);
-    scene.add_object(surface);
+	Sphere* sphere = new Sphere(Vertex(0, 0, 0), 10);
+	sphere->set_material(mat);
+
+
+	CSG* csg = new CSG(CSG::Mode::CSG_INTER, surface, sphere);
+	csg->set_material(mat);
+	
+	scene.add_object(csg);
 }
 
 // This is the entry point function to the program.
@@ -83,7 +85,7 @@ int main(int argc, char *argv[]) {
 	camera->render(scene,*fb);
 	
 	// Output the framebuffer colour and depth as two images
-	fb->writeRGBFile((char *)"quad_translation.ppm");
+	fb->writeRGBFile((char *)"final_csg.ppm");
 	// fb->writeDepthFile((char *)"depth.ppm");
 	
 	cerr << "\nDone.\n" << flush;

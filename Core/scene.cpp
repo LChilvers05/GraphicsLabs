@@ -78,25 +78,25 @@ void Scene::light_trace(Ray ray, Colour intensity, int depth) {
     // decide reflected or absorbed
     float p_d, p_s;
     hit.what->material->get_diffuse_specular_probs(p_d, p_s, hit, ray);
-    Colour ambient = hit.what->material->compute_once(ray, hit, 0);
     // Russian Roulette
     float r = random_float(0.f, 1.f);
     if (r < p_d) {
         // absorb
         photon.set_type((depth == 0) ? 1 : 2);
-        photon.set_intensity(photon.intensity);
+        photon.set_intensity(photon.intensity*p_d);
         kd_tree->insert(photon); 
 
         // do diffuse reflection
+        Colour ambient = hit.what->material->compute_once(ray, hit, 0);
         Ray rray = create_light_ray(photon.get_position(), photon.normal);
-        light_trace(rray, ambient*0.001f + photon.intensity*p_d, depth+1);
+        light_trace(rray, ambient + photon.intensity, depth+1);
 
     } else if (r < p_d + p_s) {
         // do specular reflection
         Ray rray;
         rray.direction = ray.direction - ((2.0 * photon.normal.dot(ray.direction)) * photon.normal);
         rray.position = photon.get_position() + (0.01f * rray.direction);
-        light_trace(rray, intensity, depth+1);
+        light_trace(rray, intensity*p_s, depth+1);
 
     } else {
         // absorb
@@ -115,7 +115,7 @@ void Scene::light_trace(Ray ray, Colour intensity, int depth) {
         shadow_hit_p = this->trace(sray);
 
         if (shadow_hit_p == 0 ||
-            shadow_hit_p->position.isEqual(photon.get_position())) break;
+            shadow_hit_p->what == hit_p->what) break;
 
         Hit shadow_hit = *shadow_hit_p;
         sray_pos = shadow_hit.position + (0.1f * -ray.direction);
@@ -125,8 +125,9 @@ void Scene::light_trace(Ray ray, Colour intensity, int depth) {
             continue;
         }
 
+        Colour ambient = shadow_hit.what->material->compute_once(ray, shadow_hit, 0);
         Photon shadow_photon = Photon(
-            ambient, 
+            ambient*0.001, 
             shadow_hit.what, 
             shadow_hit.position, 
             shadow_hit.normal
@@ -221,12 +222,9 @@ void Scene::raytrace(Ray ray, int recurse, Colour &colour, float &depth) {
         // such as ambient or reflect/refract
         colour = colour + best_hit->what->material->compute_once(ray, *best_hit, recurse);
 
-        bool is_shadow_tracing = true;
-        bool is_accurate_calc = true;
-
         // Pass 2: Rendering with photon map
         if (is_photon_mapping) {
-            vector<Photon> photons = kd_tree->within(Photon(best_hit->position), 1.0);
+            vector<Photon> photons = kd_tree->within(Photon(best_hit->position), 1.2);
 
             Colour sum_intensity;
             for (int i = 0; i < photons.size(); i++) { 
@@ -236,53 +234,54 @@ void Scene::raytrace(Ray ray, int recurse, Colour &colour, float &depth) {
             Colour average_intensity = sum_intensity * (1.f / photons.size());
             colour = colour + average_intensity;
 
-        } else {
-            // next, compute the light contribution for each light in the scene.
-            Light *light = light_list;
-            while (light != (Light *)0) {
-                Vector ldir;
-                Vector viewer = -ray.direction;
-                viewer.normalise();
+        }
+        // next, compute the light contribution for each light in the scene.
+        Light *light = light_list;
+        while (light != (Light *)0) {
+            Vector ldir;
+            Vector viewer = -ray.direction;
+            viewer.normalise();
 
-                bool lit = light->get_direction(best_hit->position, ldir);
-                ldir.normalise();
+            bool lit = light->get_direction(best_hit->position, ldir);
+            ldir.normalise();
 
-                // so shadow ray doesn't start behind object
-                Vertex sray_pos = best_hit->position - (0.0001f * ldir);
-                Ray sray = Ray(sray_pos, -ldir);
+            // so shadow ray doesn't start behind object
+            Vertex sray_pos = best_hit->position - (0.0001f * ldir);
+            Ray sray = Ray(sray_pos, -ldir);
 
-                float limit = 999.f;
-                PointLight *point_light = dynamic_cast<PointLight *>(light);
-                if (point_light != nullptr) {
-                    // decide shadow based on position of light
-                    limit = (point_light->get_position() - sray_pos).length();
-                }
+            float limit = 999.f;
+            PointLight *point_light = dynamic_cast<PointLight *>(light);
+            if (point_light != nullptr) {
+                // decide shadow based on position of light
+                limit = (point_light->get_position() - sray_pos).length();
+            }
 
-                // light is facing wrong way.
-                if (ldir.dot(best_hit->normal) > 0) {
-                    lit = false;
-                }
-
+            // light is facing wrong way.
+            if (ldir.dot(best_hit->normal) > 0) {
+                lit = false;
+            }
+            
+            if (!is_photon_mapping) {
                 bool inShadow = shadowtrace(sray, limit);
                 if (lit == true && inShadow) {
                     lit = false;
                 }
-
-                if (lit) {
-                    Colour intensity;
-                    light->get_intensity(best_hit->position, intensity);
-
-                    colour = colour +
-                            intensity *
-                            best_hit->what->material->compute_per_light(
-                                viewer, 
-                                *best_hit,
-                                ldir
-                            );
-                }
-
-                light = light->next;
             }
+
+            if (lit) {
+                Colour intensity;
+                light->get_intensity(best_hit->position, intensity);
+
+                colour = colour +
+                        intensity *
+                        best_hit->what->material->compute_per_light(
+                            viewer, 
+                            *best_hit,
+                            ldir
+                        );
+            }
+
+            light = light->next;
         }
 
         delete best_hit;
