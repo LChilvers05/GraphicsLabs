@@ -173,6 +173,7 @@ Vector PolyMesh::get_face_normal(const vector<int>& tri,
 }
 
 void PolyMesh::populate_vertex_normals() {
+    // if no vertex normals in the OBJ file, calculate from face normals
     for (int i = 0; i < vertex.size(); i++) {
         vertex_normals.push_back(Vector(0, 0, 0));
     }
@@ -199,7 +200,8 @@ void PolyMesh::interpolate_vertex_normals(
     Vertex a = vertex[tri[0]];
     Vertex b = vertex[tri[1]];
     Vertex c = vertex[tri[2]];
-
+    
+    // barycentric coordinates
     Vector e1 = b - a, e2 = c - a, e3 = hit->position - a;
     float d00 = e1.dot(e1); float d01 = e1.dot(e2);
     float d11 = e2.dot(e2); float d20 = e3.dot(e1);

@@ -22,6 +22,7 @@ Colour PointLight::get_intensity() {
 }
 
 bool PointLight::get_direction(Vertex &surface, Vector &dir) {
+    // direction towards the light point
     dir = surface - position; dir.normalise();
     return true;
 }
