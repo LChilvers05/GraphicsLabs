@@ -92,6 +92,7 @@ Colour GlobalMaterial::get_refraction_colour(Ray& viewer, Hit& hit, const int re
 	return colour;
 }
 
+// code adjusted from https://www.scratchapixel.com/lessons/3d-basic-rendering/introduction-to-shading/reflection-refraction-fresnel.html
 void GlobalMaterial::fresnel(float& n, float& cos_i, float& cos_t, Hit& hit, bool& is_tir) {
 	// angle must be positive
 	cos_i = abs(cos_i);

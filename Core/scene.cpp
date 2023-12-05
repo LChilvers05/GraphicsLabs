@@ -28,6 +28,7 @@ Scene::Scene() {
     scene_min = Vertex(-11.f, -1.f, -1.f);
     scene_max = Vertex(11.f, 21.f, 21.f);
 
+    //Burk, K., 2017. Kd::Tree, https://github.com/xavierholt/kd.
     Photon min(scene_min);
   	Photon max(scene_max);
     typedef KD::Core<3, Photon> CORE;
