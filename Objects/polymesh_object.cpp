@@ -280,6 +280,9 @@ Hit* PolyMesh::intersection(Ray ray) {
 
         // check inside triangle
         if (n1.dot(n2) > 0.0f && n2.dot(n3) > 0.0f) {
+            if (i == 239) {
+                int x = 0;
+            }
             vector<int> tri_n = triangle_normals[i];
             register_hit(hit, ray, hit_pos, tri, tri_n, normal);
         }

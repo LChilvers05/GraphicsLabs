@@ -58,7 +58,7 @@ void Scene::construct_photon_map(int photon_count) {
 }
 
 void Scene::light_trace(Ray ray, Colour intensity, int depth) {
-    if (depth > 2) return;
+    if (depth > 3) return;
 
     Hit* hit_p = this->trace(ray);
     if (hit_p == 0 || 
@@ -102,7 +102,7 @@ void Scene::light_trace(Ray ray, Colour intensity, int depth) {
     } else {
         // absorb
         photon.set_type(1);
-        photon.set_intensity(photon.intensity);
+        photon.set_intensity(photon.intensity*p_d);
         kd_tree->insert(photon);
     }
 
@@ -128,7 +128,7 @@ void Scene::light_trace(Ray ray, Colour intensity, int depth) {
 
         Colour ambient = shadow_hit.what->material->compute_once(ray, shadow_hit, 0);
         Photon shadow_photon = Photon(
-            ambient*0.001, 
+            ambient*0.001f, 
             shadow_hit.what, 
             shadow_hit.position, 
             shadow_hit.normal
@@ -225,7 +225,7 @@ void Scene::raytrace(Ray ray, int recurse, Colour &colour, float &depth) {
 
         // Pass 2: Rendering with photon map
         if (is_photon_mapping) {
-            vector<Photon> photons = kd_tree->within(Photon(best_hit->position), 1.2);
+            vector<Photon> photons = kd_tree->within(Photon(best_hit->position), 1.0);
 
             Colour sum_intensity;
             for (int i = 0; i < photons.size(); i++) { 

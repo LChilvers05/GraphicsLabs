@@ -49,19 +49,32 @@ void make_cornell_box(Scene& scene) {
 	scene.add_object(right);
 }
 
+PolyMesh* make_teapot() {
+	PolyMesh* teapot = new PolyMesh((char *)"teapot-low.obj");
+	teapot->smooth_render = true;
+	Transform * transform = new Transform(
+		0.5, 0, 0, 0,
+		0, 0, 0.5, 5,
+		0, -0.5, 0, 11,
+		0, 0, 0, 1
+  	); 
+	teapot->apply_transform(*transform);
+	return teapot;
+}
+
 void build_scene(Scene& scene) {
     // cornell box
 	make_cornell_box(scene);
 
+	Phong* grey = new Phong(Colour(220.f, 220.f, 220.f));
+	PolyMesh* teapot = make_teapot();
+	teapot->set_material(grey);
+	scene.add_object(teapot);
+
 	Phong* blue = new Phong(Colour(0.f, 0.f, 255.f));
-	Sphere* blue_sphere = new Sphere(Vertex(-5.f, 4.f, 10.f), 4.f);
+	Sphere* blue_sphere = new Sphere(Vertex(-6.f, 4.f, 8.f), 3.f);
 	blue_sphere->set_material(blue);
 	scene.add_object(blue_sphere);
-
-	Phong* grey = new Phong(Colour(100.f, 100.f, 100.f));
-	Sphere* grey_sphere = new Sphere(Vertex(6.f, 6.f, 5.f), 3.f);
-	grey_sphere->set_material(grey);
-	scene.add_object(grey_sphere);
 
     // light
     scene.add_light(make_light(Vertex(0.f, 19.5f, 5.f), Vector(0.f, -1.f, 0.f)));
@@ -77,7 +90,7 @@ int main(int argc, char *argv[]) {
 	Camera *camera = new FullCamera(0.6f, p_position, p_lookat, p_up);
 
 	// PASS 1: Construct Photon Map
-	int photon_count = 400000;
+	int photon_count = 1000000; //1000000
 	scene.construct_photon_map(photon_count);
 
 	// PASS 2: Render

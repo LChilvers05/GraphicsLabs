@@ -20,7 +20,7 @@ public:
 
 	Phong(Colour ambient) {
 		this->ambient = ambient;
-		this->k_d = 0.5f;
+		this->k_d = 0.55f;
 		this->k_s = 0.4f;
 	}
 
